@@ -1,0 +1,34 @@
+{
+  "name": "NourishCoach — Your Health Companion",
+  "short_name": "NourishCoach",
+  "description": "AI-powered healthy living coach with personalised NourishBudget™ tracking. Part of the NourishScore suite.",
+  "start_url": "/coach/index.html",
+  "scope": "/coach/",
+  "display": "standalone",
+  "background_color": "#0D1F12",
+  "theme_color": "#0D1F12",
+  "orientation": "any",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230D1F12'/><text y='130' x='96' font-size='100' text-anchor='middle'>🌿</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230D1F12'/><text y='350' x='256' font-size='290' text-anchor='middle'>🌿</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Home",    "url": "/coach/index.html#home",    "description": "Today's NourishBudget" },
+    { "name": "Journey", "url": "/coach/index.html#journey", "description": "Your weight journey" },
+    { "name": "Coach",   "url": "/coach/index.html#coach",   "description": "Ask your AI coach" }
+  ],
+  "related_applications": [
+    { "platform": "webapp", "url": "https://nourishscore.com/kitchen/" },
+    { "platform": "webapp", "url": "https://nourishscore.com/hub/" }
+  ]
+}
