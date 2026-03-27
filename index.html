@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0D1F12">
+<meta name="description" content="NourishScore — a suite of apps that puts nutritional quality at the centre of how you cook, eat, and live. Discover NourishKitchen, NourishCoach, and NourishHub.">
+<meta property="og:title" content="NourishScore — Cook. Score. Thrive.">
+<meta property="og:description" content="Three apps. One mission: food quality over food guilt.">
+<title>NourishScore — Cook. Score. Thrive.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest:     #0D1F12;
+  --forest-2:   #152B1A;
+  --forest-3:   #1E3D25;
+  --forest-4:   #2A5434;
+  --sage:       #6BAE78;
+  --sage-lt:    #9FCC8A;
+  --sage-pale:  #C8E6C0;
+  --cream:      #F5F0E8;
+  --cream-2:    #EDE6D9;
+  --amber:      #D4A84B;
+  --amber-lt:   #F0CB7A;
+  --coral:      #E07A5A;
+  --glass:      rgba(255,255,255,0.06);
+  --glass-bdr:  rgba(255,255,255,0.10);
+  --fd: 'Cormorant Garamond', Georgia, serif;
+  --fb: 'DM Sans', system-ui, sans-serif;
+
+  /* Band colours */
+  --flourish: #1B6B3A; --flourish-p: #EAF5EE;
+  --nourish:  #4A7C59; --nourish-p:  #EDF4EF;
+  --balance:  #7B6B2A; --balance-p:  #F7F2E0;
+  --savour:   #B05A20; --savour-p:   #FBF0E8;
+  --indulge:  #8B2020; --indulge-p:  #FBE8E8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { font-family: var(--fb); background: var(--forest); color: var(--cream); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 1000; opacity: .4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+  background: rgba(13,31,18,.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--glass-bdr);
+}
+.nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.nav-logo  { font-size: 1.4rem; }
+.nav-name  { font-family: var(--fd); font-size: 1.2rem; font-weight: 400; color: var(--cream); letter-spacing: .02em; }
+.nav-name span { color: var(--sage); font-style: italic; }
+.nav-links { display: flex; align-items: center; gap: 24px; }
+.nav-link  { font-size: .85rem; color: rgba(245,240,232,.6); text-decoration: none; transition: color .18s; }
+.nav-link:hover { color: var(--sage); }
+.nav-cta   { padding: 8px 18px; border-radius: 100px; border: 1.5px solid var(--sage); background: none; color: var(--sage); font-family: var(--fb); font-size: .83rem; font-weight: 500; text-decoration: none; transition: all .2s; cursor: pointer; }
+.nav-cta:hover { background: var(--sage); color: var(--forest); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 100px 24px 80px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(107,174,120,.12) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(212,168,75,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 70%, rgba(27,107,58,.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px; border-radius: 100px;
+  background: rgba(107,174,120,.12); border: 1px solid rgba(107,174,120,.25);
+  font-size: .75rem; font-weight: 500; color: var(--sage-lt);
+  text-transform: uppercase; letter-spacing: .1em; margin-bottom: 24px;
+  animation: fadeUp .6s ease both;
+}
+.hero-title {
+  font-family: var(--fd); font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 300; line-height: 1.08; color: var(--cream);
+  letter-spacing: -.01em; margin-bottom: 14px;
+  animation: fadeUp .6s .1s ease both;
+}
+.hero-title em { color: var(--sage); font-style: italic; }
+.hero-title .hero-dot { color: var(--amber); }
+.hero-sub {
+  font-size: clamp(.95rem, 2vw, 1.2rem); color: rgba(245,240,232,.65);
+  max-width: 560px; line-height: 1.75; margin-bottom: 40px;
+  animation: fadeUp .6s .2s ease both;
+}
+.hero-actions {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 72px; animation: fadeUp .6s .3s ease both;
+}
+.btn-hero-primary {
+  padding: 14px 32px; border-radius: 100px; border: none;
+  background: var(--sage); color: var(--forest);
+  font-family: var(--fb); font-size: .95rem; font-weight: 600;
+  text-decoration: none; transition: all .2s; letter-spacing: .02em;
+}
+.btn-hero-primary:hover { background: var(--sage-lt); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(107,174,120,.3); }
+.btn-hero-ghost {
+  padding: 14px 32px; border-radius: 100px;
+  border: 1.5px solid var(--glass-bdr); background: var(--glass);
+  color: var(--cream); font-family: var(--fb); font-size: .95rem;
+  text-decoration: none; transition: all .2s; letter-spacing: .02em;
+}
+.btn-hero-ghost:hover { border-color: var(--sage); color: var(--sage); transform: translateY(-2px); }
+
+/* ── SCORE BAND PREVIEW ── */
+.band-preview {
+  display: flex; gap: 8px; animation: fadeUp .6s .4s ease both;
+}
+.bp-chip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04); backdrop-filter: blur(8px);
+  min-width: 70px; transition: transform .2s;
+}
+.bp-chip:hover { transform: translateY(-3px); }
+.bp-emoji { font-size: 1.4rem; margin-bottom: 4px; }
+.bp-name  { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+.bp-range { font-size: .58rem; opacity: .5; margin-top: 2px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SECTION BASE ── */
+section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+.section-eyebrow {
+  font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--sage); margin-bottom: 14px;
+}
+.section-title {
+  font-family: var(--fd); font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 300; color: var(--cream); line-height: 1.2; margin-bottom: 18px;
+}
+.section-title em { color: var(--sage); font-style: italic; }
+.section-body {
+  font-size: 1rem; color: rgba(245,240,232,.65); line-height: 1.8; max-width: 580px;
+}
+
+/* ── HOW IT WORKS ── */
+.how-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 52px; }
+.how-card {
+  background: var(--glass); border: 1px solid var(--glass-bdr);
+  border-radius: 18px; padding: 28px 24px;
+  transition: border-color .2s, transform .2s;
+}
+.how-card:hover { border-color: rgba(107,174,120,.3); transform: translateY(-3px); }
+.how-step { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--sage); margin-bottom: 14px; }
+.how-icon { font-size: 2.2rem; margin-bottom: 14px; display: block; }
+.how-title { font-family: var(--fd); font-size: 1.2rem; font-weight: 400; color: var(--cream); margin-bottom: 8px; }
+.how-body  { font-size: .85rem; color: rgba(245,240,232,.6); line-height: 1.7; }
+
+/* ── APPS SECTION ── */
+.apps-section { padding: 100px 0; width: 100%; max-width: none; }
+.apps-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-top: 52px; }
+
+.app-card {
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid var(--glass-bdr);
+  transition: transform .25s, box-shadow .25s;
+  position: relative;
+}
+.app-card:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+
+.app-card-header {
+  padding: 32px 28px 24px; position: relative; overflow: hidden;
+}
+.app-card-header::after {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: rgba(255,255,255,.05);
+}
+.app-card.mise    .app-card-header { background: linear-gradient(135deg, #2C1A0E, #5A3820); }
+.app-card.coach   .app-card-header { background: linear-gradient(135deg, #0D1F12, #1E3D25); }
+.app-card.hub     .app-card-header { background: linear-gradient(135deg, #0F1E2E, #1A3850); }
+
+.app-logo   { font-size: 3rem; margin-bottom: 12px; display: block; position: relative; z-index: 1; }
+.app-name   { font-family: var(--fd); font-size: 1.8rem; font-weight: 300; color: #fff; line-height: 1.1; position: relative; z-index: 1; }
+.app-name em { font-style: italic; }
+.app-tagline { font-size: .82rem; color: rgba(255,255,255,.55); margin-top: 6px; position: relative; z-index: 1; }
+
+.app-card.mise    .app-name em { color: #D4895A; }
+.app-card.coach   .app-name em { color: var(--sage); }
+.app-card.hub     .app-name em { color: #5BAAD4; }
+
+.app-card-body { background: var(--forest-2); padding: 24px 28px 28px; }
+.app-desc { font-size: .88rem; color: rgba(245,240,232,.65); line-height: 1.7; margin-bottom: 20px; }
+.app-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.app-feature {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .82rem; color: rgba(245,240,232,.7);
+}
+.app-feature-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.app-card.mise  .app-feature-dot { background: #D4895A; }
+.app-card.coach .app-feature-dot { background: var(--sage); }
+.app-card.hub   .app-feature-dot { background: #5BAAD4; }
+
+.app-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 100px; border: none;
+  font-family: var(--fb); font-size: .85rem; font-weight: 600;
+  text-decoration: none; transition: all .2s; cursor: pointer;
+}
+.app-card.mise  .app-cta { background: #D4895A; color: #fff; }
+.app-card.mise  .app-cta:hover { background: #E0A070; transform: translateY(-1px); }
+.app-card.coach .app-cta { background: var(--sage); color: var(--forest); }
+.app-card.coach .app-cta:hover { background: var(--sage-lt); transform: translateY(-1px); }
+.app-card.hub   .app-cta { background: #5BAAD4; color: #fff; }
+.app-card.hub   .app-cta:hover { background: #7DC0E0; transform: translateY(-1px); }
+.app-pill {
+  display: inline-block; padding: 2px 9px; border-radius: 100px; font-size: .65rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-left: 8px;
+  background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+}
+
+/* ── SCORE SYSTEM ── */
+.score-section { position: relative; }
+.score-section::before {
+  content: '';
+  position: absolute; inset: -100px 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(27,107,58,.06) 40%, rgba(27,107,58,.06) 60%, transparent 100%);
+  pointer-events: none;
+}
+.bands-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 48px; }
+.band-card {
+  border-radius: 14px; overflow: hidden;
+  transition: transform .2s; cursor: default;
+}
+.band-card:hover { transform: translateY(-4px); }
+.band-card-head { padding: 20px 16px 16px; text-align: center; }
+.band-emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+.band-name  { font-family: var(--fd); font-size: 1.1rem; font-weight: 600; margin-bottom: 2px; }
+.band-range { font-size: .68rem; opacity: .7; font-weight: 500; }
+.band-card-body { padding: 12px 14px 16px; background: rgba(0,0,0,.2); }
+.band-desc { font-size: .75rem; line-height: 1.6; opacity: .8; }
+
+.band-card.flourish .band-card-head { background: var(--flourish); color: #fff; }
+.band-card.nourish  .band-card-head { background: var(--nourish);  color: #fff; }
+.band-card.balance  .band-card-head { background: var(--balance);  color: #fff; }
+.band-card.savour   .band-card-head { background: var(--savour);   color: #fff; }
+.band-card.indulge  .band-card-head { background: var(--indulge);  color: #fff; }
+
+.score-factors { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 48px; }
+.factor-group h4 { font-family: var(--fd); font-size: 1rem; color: var(--cream); margin-bottom: 12px; }
+.factor-list { display: flex; flex-direction: column; gap: 7px; }
+.factor-item { display: flex; align-items: center; gap: 9px; font-size: .83rem; color: rgba(245,240,232,.7); }
+.factor-badge {
+  font-size: .65rem; font-weight: 700; padding: 2px 7px; border-radius: 100px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.factor-badge.pos { background: rgba(107,174,120,.2); color: var(--sage-lt); }
+.factor-badge.neg { background: rgba(224,122,90,.2); color: #E0A080; }
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  background: linear-gradient(135deg, var(--forest-3), var(--forest-2));
+  border-top: 1px solid var(--glass-bdr); border-bottom: 1px solid var(--glass-bdr);
+  padding: 52px 24px;
+}
+.stats-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
+.stat-val { font-family: var(--fd); font-size: 2.8rem; font-weight: 300; color: var(--sage); line-height: 1; margin-bottom: 6px; }
+.stat-label { font-size: .78rem; color: rgba(245,240,232,.5); text-transform: uppercase; letter-spacing: .07em; }
+
+/* ── PORTION FRAMEWORK ── */
+.pf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 48px; }
+.pf-card {
+  border-radius: 14px; padding: 22px 20px; border: 1.5px solid;
+  transition: transform .2s;
+}
+.pf-card:hover { transform: translateY(-3px); }
+.pf-card.green { background: rgba(27,107,58,.08); border-color: rgba(107,174,120,.25); }
+.pf-card.amber { background: rgba(212,168,75,.08); border-color: rgba(212,168,75,.25); }
+.pf-card.red   { background: rgba(224,122,90,.08); border-color: rgba(224,122,90,.25); }
+.pf-icon   { font-size: 2rem; margin-bottom: 10px; display: block; }
+.pf-title  { font-family: var(--fd); font-size: 1.1rem; color: var(--cream); margin-bottom: 6px; }
+.pf-desc   { font-size: .82rem; color: rgba(245,240,232,.6); line-height: 1.65; }
+.pf-card.green .pf-title { color: var(--sage-lt); }
+.pf-card.amber .pf-title { color: var(--amber-lt); }
+.pf-card.red   .pf-title { color: #E0A080; }
+
+/* ── PRINCIPLES ── */
+.principles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 48px; }
+.principle-card {
+  background: var(--glass); border: 1px solid var(--glass-bdr);
+  border-radius: 14px; padding: 22px 20px; transition: border-color .2s;
+}
+.principle-card:hover { border-color: rgba(107,174,120,.25); }
+.principle-icon  { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+.principle-title { font-family: var(--fd); font-size: 1rem; color: var(--cream); margin-bottom: 6px; }
+.principle-body  { font-size: .8rem; color: rgba(245,240,232,.55); line-height: 1.65; }
+
+/* ── CTA SECTION ── */
+.cta-section {
+  text-align: center; padding: 120px 24px;
+  background: linear-gradient(180deg, transparent 0%, rgba(107,174,120,.07) 50%, transparent 100%);
+  position: relative;
+}
+.cta-title {
+  font-family: var(--fd); font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 300; color: var(--cream); margin-bottom: 18px; line-height: 1.15;
+}
+.cta-title em { color: var(--sage); font-style: italic; }
+.cta-sub { font-size: 1rem; color: rgba(245,240,232,.6); max-width: 480px; margin: 0 auto 36px; line-height: 1.75; }
+.cta-disclaimer { font-size: .72rem; color: rgba(245,240,232,.3); margin-top: 20px; line-height: 1.6; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--glass-bdr);
+  padding: 48px 32px 36px;
+  background: var(--forest-2);
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 32px; margin-bottom: 40px; }
+.footer-brand .footer-name { font-family: var(--fd); font-size: 1.3rem; color: var(--cream); }
+.footer-brand .footer-name span { color: var(--sage); font-style: italic; }
+.footer-brand .footer-desc { font-size: .8rem; color: rgba(245,240,232,.4); margin-top: 6px; max-width: 260px; line-height: 1.6; }
+.footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col h5 { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(245,240,232,.4); margin-bottom: 12px; }
+.footer-col a { display: block; font-size: .85rem; color: rgba(245,240,232,.6); text-decoration: none; margin-bottom: 8px; transition: color .15s; }
+.footer-col a:hover { color: var(--sage); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 28px; border-top: 1px solid var(--glass-bdr); }
+.footer-legal { font-size: .75rem; color: rgba(245,240,232,.3); }
+.footer-disclaimer { font-size: .72rem; color: rgba(245,240,232,.25); max-width: 600px; line-height: 1.5; }
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .bands-grid { grid-template-columns: repeat(3, 1fr); }
+  .score-factors { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .bands-grid { grid-template-columns: repeat(2, 1fr); }
+  .pf-grid { grid-template-columns: 1fr; }
+  .band-preview { flex-wrap: wrap; justify-content: center; }
+  .footer-top { flex-direction: column; }
+  .footer-links { gap: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <span class="nav-logo">🌿</span>
+    <span class="nav-name">Nourish<span>Score</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="nav-link" href="#apps">The Apps</a>
+    <a class="nav-link" href="#score">The Score</a>
+    <a class="nav-link" href="#principles">Our Principles</a>
+  </div>
+  <a class="nav-cta" href="#apps">Explore the suite →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">🌿 Introducing NourishScore™</div>
+  <h1 class="hero-title">
+    Cook<span class="hero-dot">.</span> Score<span class="hero-dot">.</span><br>
+    <em>Thrive</em><span class="hero-dot">.</span>
+  </h1>
+  <p class="hero-sub">A suite of apps that puts nutritional quality at the centre of how you cook, eat, and live — without guilt, counting, or restriction.</p>
+  <div class="hero-actions">
+    <a class="btn-hero-primary" href="#apps">Explore the suite</a>
+    <a class="btn-hero-ghost"   href="#score">How scoring works</a>
+  </div>
+  <div class="band-preview">
+    <div class="bp-chip"><span class="bp-emoji">🌿</span><span class="bp-name" style="color:var(--sage-lt)">Flourish</span><span class="bp-range">80–100</span></div>
+    <div class="bp-chip"><span class="bp-emoji">🌱</span><span class="bp-name" style="color:#8FBF9A">Nourish</span><span class="bp-range">60–79</span></div>
+    <div class="bp-chip"><span class="bp-emoji">⚖️</span><span class="bp-name" style="color:#C4B870">Balance</span><span class="bp-range">40–59</span></div>
+    <div class="bp-chip"><span class="bp-emoji">🌼</span><span class="bp-name" style="color:#D4956A">Savour</span><span class="bp-range">20–39</span></div>
+    <div class="bp-chip"><span class="bp-emoji">💫</span><span class="bp-name" style="color:#C07070">Indulge</span><span class="bp-range">0–19</span></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-eyebrow reveal">A different approach</div>
+  <h2 class="section-title reveal">Food quality, not <em>food guilt</em></h2>
+  <p class="section-body reveal">Most nutrition apps count calories and generate anxiety. NourishScore does something different — it rewards the things that actually matter: protein, fibre, whole foods, and healthy fats. High scores, not low numbers.</p>
+
+  <div class="how-grid">
+    <div class="how-card reveal">
+      <span class="how-step">Step 1</span>
+      <span class="how-icon">🍳</span>
+      <div class="how-title">Cook or discover a recipe</div>
+      <div class="how-body">Use NourishKitchen to plan your meals, or find something new in the NourishHub community library.</div>
+    </div>
+    <div class="how-card reveal">
+      <span class="how-step">Step 2</span>
+      <span class="how-icon">🤖</span>
+      <div class="how-title">AI calculates the NourishScore</div>
+      <div class="how-body">Claude analyses every ingredient and returns a score, full macros, and a Portion Signal — no manual input needed.</div>
+    </div>
+    <div class="how-card reveal">
+      <span class="how-step">Step 3</span>
+      <span class="how-icon">📊</span>
+      <div class="how-title">Your NourishCoach builds a plan</div>
+      <div class="how-body">Based on your weight and goals, your coach calculates a daily NourishBudget and helps you hit it with food you love.</div>
+    </div>
+    <div class="how-card reveal">
+      <span class="how-step">Step 4</span>
+      <span class="how-icon">🌿</span>
+      <div class="how-title">Progress naturally follows</div>
+      <div class="how-body">Better food quality means more satiety, better energy, and sustainable progress — without obsessing over numbers.</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip reveal">
+  <div class="stats-inner">
+    <div><div class="stat-val">5</div><div class="stat-label">Scoring Bands</div></div>
+    <div><div class="stat-val">100</div><div class="stat-label">Point Scale</div></div>
+    <div><div class="stat-val">3</div><div class="stat-label">Apps in the Suite</div></div>
+    <div><div class="stat-val">0</div><div class="stat-label">Calorie Obsession</div></div>
+  </div>
+</div>
+
+<!-- APPS -->
+<div class="apps-section" id="apps">
+  <div class="apps-inner">
+    <div class="section-eyebrow reveal">The NourishScore Suite</div>
+    <h2 class="section-title reveal">Three apps. <em>One mission.</em></h2>
+    <p class="section-body reveal">Each app is a complete standalone product — use one, two, or all three. They share the NourishScore™ language so everything speaks the same nutritional truth.</p>
+
+    <div class="apps-grid">
+
+      <!-- MISE EN PLACE -->
+      <div class="app-card mise reveal">
+        <div class="app-card-header">
+          <span class="app-logo">🍳</span>
+          <div class="app-name">Nourish<em>Kitchen</em></div>
+          <div class="app-tagline">Recipe Scaler · Meal Planner · Shopping Lists</div>
+        </div>
+        <div class="app-card-body">
+          <p class="app-desc">Your kitchen command centre. Scale recipes to any serving, plan your week, auto-generate shopping lists, and score every meal you cook.</p>
+          <div class="app-features">
+            <div class="app-feature"><span class="app-feature-dot"></span>NourishScore™ + Portion Framework™ on every recipe</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>AI Chef — generate custom recipes from any criteria</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>300+ real recipes via TheMealDB library</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>10 UK supermarket shopping integrations</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Works fully offline — installable PWA</div>
+          </div>
+          <a class="app-cta" href="./kitchen/index.html">Open NourishKitchen →</a>
+          <span class="app-pill">Free</span>
+        </div>
+      </div>
+
+      <!-- NOURISHCOACH -->
+      <div class="app-card coach reveal">
+        <div class="app-card-header">
+          <span class="app-logo">🌿</span>
+          <div class="app-name">Nourish<em>Coach</em></div>
+          <div class="app-tagline">AI Health Coach · Weight Journey · Daily Budget</div>
+        </div>
+        <div class="app-card-body">
+          <p class="app-desc">Your personal health companion. Not a calorie counter — a food quality coach that builds your daily NourishBudget and guides you to sustainable progress.</p>
+          <div class="app-features">
+            <div class="app-feature"><span class="app-feature-dot"></span>NourishBudget™ — personalised daily kcal, protein & fibre targets</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Weight journey tracker with milestone recognition</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Claude-powered coaching conversations</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>AI-generated weekly insights and reviews</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>kg / lbs / stone — your choice</div>
+          </div>
+          <a class="app-cta" href="./coach/index.html">Open NourishCoach →</a>
+          <span class="app-pill">Free · API key needed for AI</span>
+        </div>
+      </div>
+
+      <!-- NOURISHHUB -->
+      <div class="app-card hub reveal">
+        <div class="app-card-header">
+          <span class="app-logo">🌐</span>
+          <div class="app-name">Nourish<em>Hub</em></div>
+          <div class="app-tagline">Community Recipes · NourishScore Discovery</div>
+        </div>
+        <div class="app-card-body">
+          <p class="app-desc">The community layer. Browse thousands of recipes filtered by NourishScore band. Share your own and earn creator badges. Import anything into NourishKitchen.</p>
+          <div class="app-features">
+            <div class="app-feature"><span class="app-feature-dot"></span>Browse by NourishScore band — Flourish to Indulge</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Every submitted recipe auto-scored by AI</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Creator badges: Nourish Kitchen · Chef · Master</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>One-tap import to NourishKitchen</div>
+            <div class="app-feature"><span class="app-feature-dot"></span>Trending, dietary, and cuisine filters</div>
+          </div>
+          <a class="app-cta" href="./hub/index.html">Open NourishHub →</a>
+          <span class="app-pill">Community · Coming Soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- THE SCORE -->
+<section id="score">
+  <div class="section-eyebrow reveal">The NourishScore™</div>
+  <h2 class="section-title reveal">A score that <em>rewards quality</em></h2>
+  <p class="section-body reveal">NourishScore runs from 0 to 100 per portion. It rewards what matters — protein, fibre, whole foods — and deducts for the things that undermine your health long-term. No proprietary secrets, no opaque algorithms.</p>
+
+  <div class="bands-grid">
+    <div class="band-card flourish reveal">
+      <div class="band-card-head"><span class="band-emoji">🌿</span><div class="band-name">Flourish</div><div class="band-range">80–100</div></div>
+      <div class="band-card-body"><p class="band-desc">Outstanding nutritional balance. Protein-rich, fibre-forward, low in saturates. An everyday champion.</p></div>
+    </div>
+    <div class="band-card nourish reveal">
+      <div class="band-card-head"><span class="band-emoji">🌱</span><div class="band-name">Nourish</div><div class="band-range">60–79</div></div>
+      <div class="band-card-body"><p class="band-desc">Well-rounded with solid nutritional foundations. A reliable, satisfying everyday meal.</p></div>
+    </div>
+    <div class="band-card balance reveal">
+      <div class="band-card-head"><span class="band-emoji">⚖️</span><div class="band-name">Balance</div><div class="band-range">40–59</div></div>
+      <div class="band-card-body"><p class="band-desc">A satisfying meal to enjoy mindfully. Consider portion size or a side salad to boost the meal.</p></div>
+    </div>
+    <div class="band-card savour reveal">
+      <div class="band-card-head"><span class="band-emoji">🌼</span><div class="band-name">Savour</div><div class="band-range">20–39</div></div>
+      <div class="band-card-body"><p class="band-desc">Best enjoyed occasionally. A lighter cooking method or smaller portion makes a real difference.</p></div>
+    </div>
+    <div class="band-card indulge reveal">
+      <div class="band-card-head"><span class="band-emoji">💫</span><div class="band-name">Indulge</div><div class="band-range">0–19</div></div>
+      <div class="band-card-body"><p class="band-desc">A treat meal — savour every bite. Balance your day with lighter, nourishing choices around it.</p></div>
+    </div>
+  </div>
+
+  <div class="score-factors reveal">
+    <div class="factor-group">
+      <h4>What raises your score</h4>
+      <div class="factor-list">
+        <div class="factor-item"><span class="factor-badge pos">+15</span> Protein &gt;25g per portion</div>
+        <div class="factor-item"><span class="factor-badge pos">+12</span> Fibre &gt;8g per portion</div>
+        <div class="factor-item"><span class="factor-badge pos">+8</span>  Whole food ingredients</div>
+        <div class="factor-item"><span class="factor-badge pos">+6</span>  Prominent vegetables or fruit</div>
+        <div class="factor-item"><span class="factor-badge pos">+5</span>  Healthy fats (olive oil, avocado, oily fish)</div>
+      </div>
+    </div>
+    <div class="factor-group">
+      <h4>What lowers your score</h4>
+      <div class="factor-list">
+        <div class="factor-item"><span class="factor-badge neg">−1/60kcal</span> Calories above 350 per portion</div>
+        <div class="factor-item"><span class="factor-badge neg">−9</span> Saturated fat &gt;12g</div>
+        <div class="factor-item"><span class="factor-badge neg">−10</span> Added sugar &gt;15g</div>
+        <div class="factor-item"><span class="factor-badge neg">−4 each</span> Ultra-processed ingredients</div>
+        <div class="factor-item"><span class="factor-badge neg">−4</span> Very high sodium (&gt;1200mg)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTION FRAMEWORK -->
+<section>
+  <div class="section-eyebrow reveal">The Portion Framework™</div>
+  <h2 class="section-title reveal">The same recipe, <em>different portions</em></h2>
+  <p class="section-body reveal">A recipe's NourishScore measures its quality. The Portion Signal measures whether your actual serving supports your goals. Drag the portion adjuster in any recipe to see your numbers update live.</p>
+
+  <div class="pf-grid">
+    <div class="pf-card green reveal">
+      <span class="pf-icon">🟢</span>
+      <div class="pf-title">Portion-friendly</div>
+      <p class="pf-desc">Under 450 kcal at the defined serving, with solid protein and fibre to keep you satisfied. Eat freely at this size.</p>
+    </div>
+    <div class="pf-card amber reveal">
+      <span class="pf-icon">🟡</span>
+      <div class="pf-title">Mind your portion</div>
+      <p class="pf-desc">Calorie-dense or moderate protein. The recipe is good — consider the serving size or add a green side to the plate.</p>
+    </div>
+    <div class="pf-card red reveal">
+      <span class="pf-icon">🔴</span>
+      <div class="pf-title">Half-and-fill</div>
+      <p class="pf-desc">Over 650 kcal per defined serving. Try halving the portion and filling the rest of your plate with leafy greens.</p>
+    </div>
+  </div>
+
+  <p style="font-size:.75rem;color:rgba(245,240,232,.35);margin-top:20px;line-height:1.6;max-width:560px">
+    The Fill Rate™ — (protein + fibre) ÷ kcal × 100 — measures satiety per calorie. Meals scoring 12+ keep you full significantly longer. All values are estimates and not a substitute for personalised dietary advice.
+  </p>
+</section>
+
+<!-- PRINCIPLES -->
+<section id="principles">
+  <div class="section-eyebrow reveal">What we believe</div>
+  <h2 class="section-title reveal">Designed around <em>real people</em></h2>
+  <p class="section-body reveal">Every design decision in the NourishScore suite starts here.</p>
+
+  <div class="principles-grid">
+    <div class="principle-card reveal">
+      <span class="principle-icon">🚫</span>
+      <div class="principle-title">No calorie obsession</div>
+      <p class="principle-body">Calories matter, but they're a crude measure. We surface protein, fibre, and food quality because those drive outcomes.</p>
+    </div>
+    <div class="principle-card reveal">
+      <span class="principle-icon">📱</span>
+      <div class="principle-title">Your data stays yours</div>
+      <p class="principle-body">NourishKitchen and NourishCoach store everything on your device. Nothing is uploaded, sold, or shared. Ever.</p>
+    </div>
+    <div class="principle-card reveal">
+      <span class="principle-icon">🌿</span>
+      <div class="principle-title">Encourage, don't shame</div>
+      <p class="principle-body">Indulge isn't "bad". It's a treat worth savouring. Our language is positive, not prescriptive.</p>
+    </div>
+    <div class="principle-card reveal">
+      <span class="principle-icon">🔬</span>
+      <div class="principle-title">Evidence-based</div>
+      <p class="principle-body">The scoring algorithm is derived from publicly available nutrition science — Harris-Benedict, AMDR, NHS guidelines. No proprietary black boxes.</p>
+    </div>
+    <div class="principle-card reveal">
+      <span class="principle-icon">⚕️</span>
+      <div class="principle-title">Not medical advice</div>
+      <p class="principle-body">NourishScore guides food quality choices. For personalised health advice, always consult a registered dietitian or GP.</p>
+    </div>
+    <div class="principle-card reveal">
+      <span class="principle-icon">🌍</span>
+      <div class="principle-title">Free and open</div>
+      <p class="principle-body">All three apps are free to use. The scoring algorithm is transparent. The community on NourishHub belongs to its members.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2 class="cta-title reveal">Start cooking <em>with purpose</em></h2>
+  <p class="cta-sub reveal">Pick an app and begin. No account required for NourishKitchen or NourishCoach — just install and go.</p>
+  <div class="hero-actions reveal">
+    <a class="btn-hero-primary" href="./kitchen/index.html">Open NourishKitchen</a>
+    <a class="btn-hero-ghost"   href="./coach/index.html">Open NourishCoach</a>
+  </div>
+  <p class="cta-disclaimer reveal">NourishScore™, Portion Framework™, Fill Rate™, and NourishBudget™ are original proprietary concepts. Nutritional values produced by the AI scoring system are estimates and should not replace advice from a registered dietitian or medical professional.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-name">🌿 Nourish<span>Score</span></div>
+        <div class="footer-desc">A suite of apps built around food quality, not food guilt. Cook, score, and thrive.</div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h5>The Suite</h5>
+          <a href="./kitchen/index.html">NourishKitchen</a>
+          <a href="./coach/index.html">NourishCoach</a>
+          <a href="./hub/index.html">NourishHub</a>
+        </div>
+        <div class="footer-col">
+          <h5>Learn</h5>
+          <a href="#score">The NourishScore</a>
+          <a href="#score">Portion Framework</a>
+          <a href="#principles">Our Principles</a>
+        </div>
+        <div class="footer-col">
+          <h5>Deploy</h5>
+          <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>
+          <a href="https://console.anthropic.com" target="_blank" rel="noopener">Anthropic API</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-legal">© 2025 NourishScore. Built with 🌿</span>
+      <span class="footer-disclaimer">NourishScore provides food quality guidance. Not a substitute for advice from a registered dietitian, doctor, or qualified health professional.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Smooth nav highlight
+const sections = document.querySelectorAll('section[id], div[id="apps"]');
+const navLinks = document.querySelectorAll('.nav-link');
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.style.color = '');
+      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (link) link.style.color = 'var(--sage)';
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => sectionObserver.observe(s));
+</script>
+</body>
+</html>
