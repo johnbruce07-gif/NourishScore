@@ -1,0 +1,33 @@
+{
+  "name": "NourishHub — Community Recipes, Scored for Health",
+  "short_name": "NourishHub",
+  "description": "Discover and share recipes scored by NourishScore™. Every recipe rated for nutritional quality.",
+  "start_url": "/hub/index.html",
+  "scope": "/hub/",
+  "display": "standalone",
+  "background_color": "#F7F5F0",
+  "theme_color": "#1B6B3A",
+  "orientation": "any",
+  "categories": ["food", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231B6B3A'/><text y='130' x='96' font-size='108' text-anchor='middle'>🌿</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%231B6B3A'/><text y='350' x='256' font-size='290' text-anchor='middle'>🌿</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Browse Recipes", "url": "/hub/index.html#/browse", "description": "Discover community recipes" },
+    { "name": "Submit Recipe",  "url": "/hub/index.html#/submit", "description": "Share your recipe" }
+  ],
+  "related_applications": [
+    { "platform": "webapp", "url": "https://nourishscore.com/kitchen/" },
+    { "platform": "webapp", "url": "https://nourishscore.com/coach/" }
+  ]
+}
