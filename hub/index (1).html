@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#1B6B3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NourishHub">
+<meta name="description" content="NourishHub — discover and share recipes scored for nutritional quality. Every recipe rated by NourishScore™.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231B6B3A'/><text y='130' x='96' font-size='108' text-anchor='middle'>🌿</text></svg>">
+<title>NourishHub — Community Recipes, Scored for Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════════ */
+:root {
+  --paper:      #F7F5F0;
+  --paper-2:    #EFECE5;
+  --white:      #FFFFFF;
+  --ink:        #1A2E1C;
+  --ink-soft:   #3D5940;
+  --ink-mid:    #618265;
+  --ink-dim:    #94AE97;
+  --forest:     #1B6B3A;
+  --forest-lt:  #2D8A50;
+  --forest-pale:#EAF5EE;
+  --gold:       #C4922A;
+  --gold-pale:  #FBF5E6;
+  --border:     #DFE8E0;
+  --border-dk:  #BFCEC1;
+  --shadow-sm:  0 1px 4px rgba(26,46,28,.07);
+  --shadow-md:  0 4px 18px rgba(26,46,28,.10);
+  --shadow-lg:  0 12px 40px rgba(26,46,28,.14);
+  --shadow-glow:0 6px 28px rgba(27,107,58,.18);
+  --r:    14px;
+  --r-sm: 8px;
+  --r-xs: 5px;
+  --fd: 'Playfair Display', Georgia, serif;
+  --fb: 'Nunito', system-ui, sans-serif;
+
+  /* NourishScore band colours */
+  --flourish:      #1B6B3A;
+  --flourish-pale: #EAF5EE;
+  --flourish-text: #0D3D20;
+  --nourish:       #4A7C59;
+  --nourish-pale:  #EDF4EF;
+  --nourish-text:  #2A4D35;
+  --balance:       #7B6B2A;
+  --balance-pale:  #F7F2E0;
+  --balance-text:  #4D4218;
+  --savour:        #B05A20;
+  --savour-pale:   #FBF0E8;
+  --savour-text:   #6D3710;
+  --indulge:       #8B2020;
+  --indulge-pale:  #FBE8E8;
+  --indulge-text:  #5A1212;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { font-family: var(--fb); background: var(--paper); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TYPOGRAPHY ── */
+h1,h2,h3,h4 { font-family: var(--fd); font-weight: 600; line-height: 1.25; }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--fb); cursor: pointer; }
+input, textarea, select { font-family: var(--fb); }
+
+/* ── SETUP BANNER ── */
+.setup-banner {
+  background: #1A2E1C; color: #F7F5F0;
+  padding: 10px 20px; text-align: center; font-size: .82rem; display: none;
+}
+.setup-banner.show { display: block; }
+.setup-banner code { background: rgba(255,255,255,.15); padding: 2px 7px; border-radius: 4px; font-size: .78rem; }
+
+/* ── HEADER ── */
+.site-header {
+  position: sticky; top: 32px; z-index: 250;
+  background: rgba(247,245,240,.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1280px; margin: 0 auto;
+  padding: 0 20px; height: 62px;
+  display: flex; align-items: center; gap: 16px;
+}
+.brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.brand-logo { font-size: 1.5rem; }
+.brand-name {
+  font-family: var(--fd); font-size: 1.25rem; font-weight: 700;
+  color: var(--ink); letter-spacing: -.01em;
+}
+.brand-name span { color: var(--forest); font-style: italic; }
+
+.header-search {
+  flex: 1; max-width: 420px;
+  display: flex; align-items: center;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 100px; overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.header-search:focus-within { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(27,107,58,.08); }
+.header-search input {
+  flex: 1; padding: 9px 16px; border: none; background: none;
+  font-size: .88rem; color: var(--ink); outline: none;
+}
+.header-search input::placeholder { color: var(--ink-dim); }
+.search-btn {
+  width: 38px; height: 38px; border: none; background: none;
+  color: var(--ink-mid); font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  transition: color .15s;
+}
+.search-btn:hover { color: var(--forest); }
+
+.header-actions { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+.btn-header {
+  padding: 8px 16px; border-radius: 100px; font-size: .83rem; font-weight: 600;
+  transition: all .18s; white-space: nowrap;
+}
+.btn-outline {
+  border: 1.5px solid var(--border-dk); background: none; color: var(--ink-soft);
+}
+.btn-outline:hover { border-color: var(--forest); color: var(--forest); }
+.btn-solid {
+  border: none; background: var(--forest); color: var(--white);
+  box-shadow: 0 2px 8px rgba(27,107,58,.25);
+}
+.btn-solid:hover { background: var(--forest-lt); transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+
+.user-chip {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 12px 5px 6px; border-radius: 100px;
+  border: 1.5px solid var(--border); background: var(--white); cursor: pointer;
+  transition: border-color .15s;
+}
+.user-chip:hover { border-color: var(--forest); }
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--forest-pale); display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: var(--forest); overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-name { font-size: .82rem; font-weight: 600; color: var(--ink); }
+
+/* ── MAIN ── */
+.site-main { max-width: 1280px; margin: 0 auto; padding: 0 20px 60px; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── BAND FILTERS (the hero element) ── */
+.band-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin: 24px 0 20px;
+}
+.band-chip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 8px 12px; border-radius: var(--r); border: 2px solid transparent;
+  cursor: pointer; transition: all .2s; text-align: center;
+}
+.band-chip:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.band-chip.active { border-color: currentColor; box-shadow: var(--shadow-md); }
+.band-chip-emoji  { font-size: 1.6rem; margin-bottom: 5px; }
+.band-chip-name   { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.band-chip-range  { font-size: .65rem; margin-top: 2px; opacity: .7; }
+
+.band-chip.flourish { background: var(--flourish-pale); color: var(--flourish-text); }
+.band-chip.nourish  { background: var(--nourish-pale);  color: var(--nourish-text); }
+.band-chip.balance  { background: var(--balance-pale);  color: var(--balance-text); }
+.band-chip.savour   { background: var(--savour-pale);   color: var(--savour-text); }
+.band-chip.indulge  { background: var(--indulge-pale);  color: var(--indulge-text); }
+.band-chip.all      { background: var(--paper-2); color: var(--ink-soft); }
+.band-chip.all.active { border-color: var(--border-dk); }
+
+/* ── SECONDARY FILTERS ── */
+.filter-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.filter-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+.filter-chip {
+  padding: 5px 12px; border-radius: 100px; border: 1.5px solid var(--border);
+  background: var(--white); font-size: .78rem; font-weight: 500; color: var(--ink-soft);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.filter-chip:hover { border-color: var(--forest); color: var(--forest); }
+.filter-chip.active { background: var(--forest); border-color: var(--forest); color: var(--white); }
+.filter-chip.dietary.active { background: var(--ink); border-color: var(--ink); }
+
+.sort-select {
+  padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 100px;
+  background: var(--white); font-size: .78rem; color: var(--ink-soft); font-family: var(--fb);
+  cursor: pointer; outline: none; margin-left: auto;
+}
+.sort-select:focus { border-color: var(--forest); }
+
+/* ── RECIPE GRID ── */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+.recipe-card {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--border); overflow: hidden;
+  transition: transform .22s, box-shadow .22s, border-color .22s;
+  cursor: pointer; display: flex; flex-direction: column;
+}
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  border-color: rgba(27,107,58,.2);
+}
+.card-image {
+  position: relative; background: var(--paper-2);
+  height: 180px; overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-image img { width: 100%; height: 100%; object-fit: cover; }
+.card-image .card-emoji { font-size: 4rem; }
+.card-score {
+  position: absolute; top: 10px; left: 10px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 100px;
+  font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.card-portion {
+  position: absolute; top: 10px; right: 10px;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; backdrop-filter: blur(6px);
+  background: rgba(255,255,255,.85);
+}
+.card-save-btn {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,.9); backdrop-filter: blur(4px);
+  color: var(--ink-mid); font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; opacity: 0;
+}
+.recipe-card:hover .card-save-btn { opacity: 1; }
+.card-save-btn:hover { background: var(--white); color: var(--gold); }
+.card-save-btn.saved { opacity: 1; color: var(--gold); }
+
+.card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+.card-category {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--ink-dim); margin-bottom: 6px;
+}
+.card-title {
+  font-family: var(--fd); font-size: 1.05rem; font-weight: 600;
+  color: var(--ink); line-height: 1.35; margin-bottom: 8px;
+}
+.card-meta {
+  display: flex; gap: 10px; font-size: .73rem; color: var(--ink-dim);
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.card-meta span { display: flex; align-items: center; gap: 3px; }
+.card-dietary { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.dietary-tag {
+  font-size: .62rem; padding: 2px 7px; border-radius: 100px;
+  background: var(--forest-pale); color: var(--forest); font-weight: 600;
+}
+.card-author {
+  display: flex; align-items: center; gap: 7px; margin-top: auto;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+.author-avatar-sm {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--paper-2); display: flex; align-items: center; justify-content: center;
+  font-size: .6rem; font-weight: 700; color: var(--ink-mid); overflow: hidden; flex-shrink: 0;
+}
+.author-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+.author-name { font-size: .75rem; color: var(--ink-soft); font-weight: 500; }
+.author-badge { font-size: .65rem; }
+.card-import-btn {
+  margin-left: auto; padding: 4px 10px; border-radius: 100px;
+  border: 1px solid var(--border); background: none;
+  font-size: .68rem; font-weight: 600; color: var(--ink-mid);
+  transition: all .15s; white-space: nowrap;
+}
+.card-import-btn:hover { border-color: var(--forest); color: var(--forest); background: var(--forest-pale); }
+
+/* ── LOADING / EMPTY STATES ── */
+.loading-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px;
+}
+.skeleton-card {
+  background: var(--white); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden;
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--paper-2) 25%, var(--paper) 50%, var(--paper-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.sk-img  { height: 180px; }
+.sk-body { padding: 14px 16px; }
+.sk-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+
+.empty-state {
+  grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--ink-dim);
+}
+.empty-icon  { font-size: 3.5rem; margin-bottom: 14px; }
+.empty-title { font-family: var(--fd); font-size: 1.3rem; color: var(--ink-soft); margin-bottom: 8px; }
+.empty-desc  { font-size: .88rem; line-height: 1.7; max-width: 360px; margin: 0 auto 20px; }
+
+/* ── RECIPE DETAIL MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(26,46,28,.5); backdrop-filter: blur(5px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 24px 16px; overflow-y: auto;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.recipe-modal {
+  background: var(--white); border-radius: var(--r);
+  width: 100%; max-width: 740px;
+  box-shadow: var(--shadow-lg);
+  transform: scale(.97) translateY(10px);
+  transition: transform .28s cubic-bezier(.34,1.1,.64,1);
+  margin: auto;
+}
+.modal-overlay.open .recipe-modal { transform: scale(1) translateY(0); }
+
+.modal-cover {
+  position: relative; height: 260px; background: var(--paper-2);
+  border-radius: var(--r) var(--r) 0 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-cover img { width: 100%; height: 100%; object-fit: cover; }
+.modal-cover .modal-emoji { font-size: 6rem; }
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 34px; height: 34px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,.9); color: var(--ink); font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s;
+}
+.modal-close:hover { background: var(--white); }
+
+.modal-score-badge {
+  position: absolute; bottom: 14px; left: 14px;
+  padding: 6px 14px; border-radius: 100px; font-size: .8rem; font-weight: 700;
+}
+.modal-portion-badge {
+  position: absolute; bottom: 14px; right: 54px;
+  padding: 5px 11px; border-radius: 100px; font-size: .78rem; font-weight: 600;
+  background: rgba(255,255,255,.9);
+}
+
+.modal-body { padding: 24px 28px 32px; }
+.modal-header { margin-bottom: 18px; }
+.modal-category {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--ink-dim); margin-bottom: 6px;
+}
+.modal-title { font-family: var(--fd); font-size: 2rem; font-weight: 700; line-height: 1.2; color: var(--ink); margin-bottom: 10px; }
+.modal-author {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 14px;
+}
+.modal-author-av {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--paper-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: var(--ink-mid); overflow: hidden;
+}
+.modal-author-av img { width: 100%; height: 100%; object-fit: cover; }
+.modal-author-name { font-size: .85rem; font-weight: 600; color: var(--ink-soft); }
+.modal-author-badge { font-size: .72rem; }
+
+.modal-meta {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.modal-meta-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 100px; background: var(--paper-2);
+  font-size: .78rem; color: var(--ink-soft);
+}
+
+.modal-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 24px; }
+.btn-action {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 100px; font-size: .85rem; font-weight: 600;
+  transition: all .18s; white-space: nowrap;
+}
+.btn-import {
+  background: var(--forest); color: var(--white); border: none;
+  box-shadow: 0 2px 8px rgba(27,107,58,.25);
+}
+.btn-import:hover { background: var(--forest-lt); transform: translateY(-1px); }
+.btn-save-recipe { background: none; border: 1.5px solid var(--border-dk); color: var(--ink-soft); }
+.btn-save-recipe:hover { border-color: var(--gold); color: var(--gold); }
+.btn-save-recipe.saved { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+
+/* Score card inside modal */
+.modal-score-card {
+  border-radius: var(--r-sm); overflow: hidden; margin-bottom: 24px;
+  border: 1.5px solid var(--border);
+}
+.msc-header {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; color: var(--white);
+}
+.msc-ring {
+  width: 52px; height: 52px; border-radius: 50%; border: 3px solid rgba(255,255,255,.3);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.msc-score-num { font-family: var(--fd); font-size: 1.3rem; font-weight: 700; line-height: 1; }
+.msc-score-max { font-size: .55rem; opacity: .75; }
+.msc-band-name { font-family: var(--fd); font-size: 1.1rem; font-weight: 600; }
+.msc-band-desc { font-size: .75rem; opacity: .85; margin-top: 2px; line-height: 1.4; }
+.msc-body { padding: 14px 16px; background: var(--white); }
+.msc-macros {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-bottom: 12px;
+}
+.msc-macro {
+  text-align: center; padding: 8px 4px; background: var(--paper); border-radius: var(--r-xs);
+}
+.msc-macro-val { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--ink); }
+.msc-macro-unit{ font-size: .58rem; color: var(--ink-dim); }
+.msc-macro-label{ font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); margin-top: 2px; }
+.msc-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.msc-pill { font-size: .7rem; padding: 3px 9px; border-radius: 100px; font-weight: 600; }
+.msc-pill.pos { background: var(--forest-pale); color: var(--forest); }
+.msc-pill.watch { background: #FFF3E0; color: #7C4700; }
+.msc-tip { font-size: .75rem; color: var(--ink-mid); line-height: 1.55; font-style: italic; }
+.msc-disclaimer { font-size: .65rem; color: var(--ink-dim); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); line-height: 1.5; }
+
+/* Portion signal inside modal */
+.portion-signal {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: var(--r-xs); margin-bottom: 12px; border: 1.5px solid;
+}
+.portion-signal.green { background: #F0FBF4; border-color: #A8D5B5; }
+.portion-signal.amber { background: #FFFBF0; border-color: #F0D080; }
+.portion-signal.red   { background: #FFF5F5; border-color: #F0B0A8; }
+.ps-icon { font-size: 1.3rem; }
+.ps-label { font-size: .82rem; font-weight: 700; }
+.portion-signal.green .ps-label { color: #1B6B3A; }
+.portion-signal.amber .ps-label { color: #7C5A00; }
+.portion-signal.red   .ps-label { color: #8B2020; }
+.ps-desc  { font-size: .73rem; color: var(--ink-mid); margin-top: 1px; line-height: 1.4; }
+
+/* Ingredients & Instructions */
+.modal-section-title {
+  font-family: var(--fd); font-size: 1.05rem; font-weight: 600; color: var(--ink);
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+}
+.ing-grid { list-style: none; display: grid; gap: 7px; margin-bottom: 24px; }
+.ing-row {
+  display: flex; align-items: center; gap: 8px; padding: 7px 11px;
+  background: var(--paper); border-radius: var(--r-xs); font-size: .87rem;
+}
+.ing-amount { font-weight: 700; color: var(--forest); min-width: 64px; font-size: .83rem; }
+.ing-name { color: var(--ink); }
+.steps-list { list-style: none; display: grid; gap: 12px; margin-bottom: 24px; }
+.step-row { display: flex; gap: 12px; align-items: flex-start; }
+.step-num {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--forest);
+  color: var(--white); font-size: .75rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: .87rem; line-height: 1.7; color: var(--ink); }
+
+/* ── AUTH MODAL ── */
+.auth-modal {
+  background: var(--white); border-radius: var(--r);
+  width: 100%; max-width: 420px; padding: 32px;
+  box-shadow: var(--shadow-lg); margin: auto;
+  transform: scale(.96); transition: transform .25s;
+}
+.modal-overlay.open .auth-modal { transform: scale(1); }
+.auth-header { text-align: center; margin-bottom: 24px; }
+.auth-logo { font-size: 2rem; margin-bottom: 8px; }
+.auth-title { font-family: var(--fd); font-size: 1.5rem; color: var(--ink); margin-bottom: 4px; }
+.auth-sub { font-size: .82rem; color: var(--ink-dim); }
+.auth-tabs { display: flex; gap: 0; margin-bottom: 22px; border: 1.5px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.auth-tab { flex: 1; padding: 9px; border: none; background: none; font-family: var(--fb); font-size: .85rem; font-weight: 600; color: var(--ink-dim); cursor: pointer; transition: all .15s; }
+.auth-tab.active { background: var(--forest); color: var(--white); }
+.auth-field { margin-bottom: 14px; }
+.auth-label { display: block; font-size: .72rem; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+.auth-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); font-size: .9rem; color: var(--ink); outline: none;
+  transition: border-color .2s; background: var(--white);
+}
+.auth-input:focus { border-color: var(--forest); }
+.auth-btn {
+  width: 100%; padding: 12px; border-radius: 100px; border: none;
+  background: var(--forest); color: var(--white); font-family: var(--fb);
+  font-size: .95rem; font-weight: 700; cursor: pointer; margin-top: 4px; transition: all .2s;
+}
+.auth-btn:hover { background: var(--forest-lt); transform: translateY(-1px); }
+.auth-error { background: #FBE8E8; color: #8B2020; font-size: .78rem; padding: 9px 12px; border-radius: var(--r-xs); margin-bottom: 12px; }
+
+/* ── SUBMIT PAGE ── */
+.submit-page { max-width: 760px; margin: 32px auto; }
+.submit-header { margin-bottom: 32px; }
+.submit-title { font-family: var(--fd); font-size: 2.2rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.submit-sub { font-size: .9rem; color: var(--ink-mid); line-height: 1.6; }
+
+.submit-card {
+  background: var(--white); border-radius: var(--r); border: 1px solid var(--border);
+  padding: 24px 28px; margin-bottom: 16px;
+}
+.submit-card-title { font-family: var(--fd); font-size: 1.1rem; color: var(--ink); margin-bottom: 18px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: .72rem; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); font-size: .9rem; color: var(--ink); outline: none;
+  transition: border-color .2s; background: var(--white); font-family: var(--fb);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--forest); }
+.form-textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+.form-select option { background: var(--white); }
+
+.ing-entry {
+  display: grid; grid-template-columns: 80px 70px 1fr auto; gap: 7px;
+  margin-bottom: 7px; align-items: center;
+}
+.ing-entry input {
+  padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--r-xs);
+  font-family: var(--fb); font-size: .85rem; color: var(--ink); outline: none;
+  background: var(--white); transition: border-color .2s;
+}
+.ing-entry input:focus { border-color: var(--forest); }
+.ing-remove {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: var(--paper-2); color: var(--ink-mid); cursor: pointer; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.ing-remove:hover { background: #FBE8E8; color: #8B2020; }
+.add-ing-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px;
+  border-radius: 100px; border: 1.5px dashed var(--border-dk); background: none;
+  color: var(--ink-mid); font-size: .8rem; font-weight: 600; cursor: pointer; margin-top: 4px;
+  transition: all .15s;
+}
+.add-ing-btn:hover { border-color: var(--forest); color: var(--forest); background: var(--forest-pale); }
+
+.dietary-checks { display: flex; flex-wrap: wrap; gap: 7px; }
+.dietary-check { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--white); font-size: .78rem; cursor: pointer; transition: all .15s; user-select: none; }
+.dietary-check input { width: 13px; height: 13px; accent-color: var(--forest); }
+.dietary-check:has(input:checked) { background: var(--forest-pale); border-color: var(--forest); color: var(--forest); font-weight: 600; }
+
+.ns-preview-card {
+  background: var(--paper); border-radius: var(--r-sm); padding: 16px;
+  border: 1.5px solid var(--border); margin-bottom: 16px;
+}
+.ns-preview-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-dim); margin-bottom: 10px; }
+.ns-preview-btn {
+  width: 100%; padding: 11px; border-radius: 100px; border: 1.5px solid var(--forest);
+  background: var(--forest-pale); color: var(--forest); font-family: var(--fb);
+  font-size: .88rem; font-weight: 700; cursor: pointer; transition: all .18s;
+}
+.ns-preview-btn:hover { background: var(--forest); color: var(--white); }
+
+.submit-final-btn {
+  width: 100%; padding: 14px; border-radius: 100px; border: none;
+  background: var(--forest); color: var(--white); font-family: var(--fb);
+  font-size: 1rem; font-weight: 700; cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 16px rgba(27,107,58,.3);
+}
+.submit-final-btn:hover { background: var(--forest-lt); transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+.submit-final-btn:disabled { background: var(--ink-dim); box-shadow: none; transform: none; cursor: not-allowed; }
+
+/* ── PROFILE PAGE ── */
+.profile-hero {
+  background: var(--white); border-radius: var(--r); border: 1px solid var(--border);
+  padding: 28px; margin: 28px 0 20px;
+  display: flex; align-items: flex-start; gap: 22px; flex-wrap: wrap;
+}
+.profile-avatar {
+  width: 80px; height: 80px; border-radius: 50%; background: var(--forest-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 700; color: var(--forest); flex-shrink: 0; overflow: hidden;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-family: var(--fd); font-size: 1.8rem; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.profile-handle { font-size: .85rem; color: var(--ink-dim); margin-bottom: 8px; }
+.profile-bio { font-size: .88rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: 12px; }
+.profile-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 100px; font-size: .75rem; font-weight: 700;
+  background: var(--forest-pale); color: var(--forest); border: 1px solid rgba(27,107,58,.2);
+}
+.profile-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 14px; }
+.profile-stat { text-align: center; }
+.profile-stat-val { font-family: var(--fd); font-size: 1.4rem; font-weight: 700; color: var(--forest); }
+.profile-stat-label { font-size: .68rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--ink); color: var(--white);
+  padding: 11px 20px; border-radius: 100px; font-size: .85rem; font-weight: 600;
+  z-index: 600; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── SPINNER ── */
+.spinner {
+  width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3);
+  border-top-color: currentColor; border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .band-strip { grid-template-columns: repeat(3, 1fr); }
+  .header-search { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .modal-body { padding: 18px 18px 24px; }
+  .profile-hero { flex-direction: column; }
+  .recipe-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .band-strip { grid-template-columns: repeat(2, 1fr); }
+  .band-chip.all { display: none; }
+  .ing-entry { grid-template-columns: 1fr 1fr auto auto; }
+}
+
+/* ── SUITE NAV ── */
+.suite-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:32px;background:#0D1F12;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:300;font-family:'DM Sans','Nunito',system-ui,sans-serif}
+.suite-nav-brand{font-size:.72rem;font-weight:600;color:rgba(245,240,232,.55);text-decoration:none;letter-spacing:.03em;transition:color .15s}
+.suite-nav-brand:hover{color:#6BAE78}
+.suite-nav-apps{display:flex;gap:4px}
+.suite-nav-app{font-size:.7rem;font-weight:500;color:rgba(245,240,232,.4);text-decoration:none;padding:3px 9px;border-radius:100px;transition:all .15s}
+.suite-nav-app:hover{color:rgba(245,240,232,.85);background:rgba(255,255,255,.06)}
+.suite-nav-app.active{color:#fff;background:rgba(255,255,255,.1)}
+</style>
+</head>
+<body>
+
+<!-- SETUP BANNER -->
+<div class="setup-banner" id="setupBanner">
+  ⚙️ Configure Supabase: replace <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> in the script below.
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand" style="cursor:pointer" onclick="navigate('browse')">
+      <span class="brand-logo">🌿</span>
+      <span class="brand-name">Nourish<span>Hub</span></span>
+    </div>
+    <div class="header-search">
+      <input type="text" id="headerSearch" placeholder="Search recipes, creators…" onkeydown="if(event.key==='Enter') doSearch()">
+      <button class="search-btn" onclick="doSearch()">🔍</button>
+    </div>
+    <div class="header-actions" id="headerActions">
+      <!-- Rendered by JS based on auth state -->
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="site-main">
+
+  <!-- BROWSE PAGE -->
+  <div class="page active" id="page-browse">
+    <!-- Band filters -->
+    <div class="band-strip" id="bandStrip">
+      <div class="band-chip all active" onclick="filterBand(null, this)">
+        <span class="band-chip-emoji">🍽</span>
+        <span class="band-chip-name">All</span>
+        <span class="band-chip-range">Any score</span>
+      </div>
+      <div class="band-chip flourish" onclick="filterBand('Flourish', this)">
+        <span class="band-chip-emoji">🌿</span>
+        <span class="band-chip-name">Flourish</span>
+        <span class="band-chip-range">80–100</span>
+      </div>
+      <div class="band-chip nourish" onclick="filterBand('Nourish', this)">
+        <span class="band-chip-emoji">🌱</span>
+        <span class="band-chip-name">Nourish</span>
+        <span class="band-chip-range">60–79</span>
+      </div>
+      <div class="band-chip balance" onclick="filterBand('Balance', this)">
+        <span class="band-chip-emoji">⚖️</span>
+        <span class="band-chip-name">Balance</span>
+        <span class="band-chip-range">40–59</span>
+      </div>
+      <div class="band-chip savour" onclick="filterBand('Savour', this)">
+        <span class="band-chip-emoji">🌼</span>
+        <span class="band-chip-name">Savour</span>
+        <span class="band-chip-range">20–39</span>
+      </div>
+    </div>
+
+    <!-- Secondary filters -->
+    <div class="filter-bar">
+      <div class="filter-group" id="categoryFilters">
+        <button class="filter-chip active" onclick="filterCategory(null, this)">All Meals</button>
+        <button class="filter-chip" onclick="filterCategory('Breakfast', this)">🌅 Breakfast</button>
+        <button class="filter-chip" onclick="filterCategory('Lunch', this)">🥗 Lunch</button>
+        <button class="filter-chip" onclick="filterCategory('Dinner', this)">🍽 Dinner</button>
+        <button class="filter-chip" onclick="filterCategory('Snack', this)">🫙 Snack</button>
+        <button class="filter-chip" onclick="filterCategory('Dessert', this)">🍰 Dessert</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group" id="dietaryFilters">
+        <button class="filter-chip dietary" onclick="toggleDietary('vegan', this)">🌱 Vegan</button>
+        <button class="filter-chip dietary" onclick="toggleDietary('vegetarian', this)">🥦 Veggie</button>
+        <button class="filter-chip dietary" onclick="toggleDietary('gluten-free', this)">🌾 GF</button>
+      </div>
+      <select class="sort-select" onchange="changeSort(this.value)">
+        <option value="recent">Most Recent</option>
+        <option value="score">Highest Score</option>
+        <option value="popular">Most Imported</option>
+        <option value="trending">Trending</option>
+      </select>
+    </div>
+
+    <!-- Results count -->
+    <div style="font-size:.78rem;color:var(--ink-dim);margin-bottom:14px" id="resultsLabel"></div>
+
+    <!-- Recipe grid -->
+    <div id="recipeGrid"></div>
+
+    <!-- Load more -->
+    <div style="text-align:center;margin-top:28px" id="loadMoreWrap" style="display:none">
+      <button class="btn-header btn-outline" id="loadMoreBtn" onclick="loadMore()" style="padding:11px 28px">Load more recipes</button>
+    </div>
+  </div>
+
+  <!-- RECIPE DETAIL PAGE (route only — detail is also in modal) -->
+  <div class="page" id="page-recipe"></div>
+
+  <!-- PROFILE PAGE -->
+  <div class="page" id="page-profile"></div>
+
+  <!-- SUBMIT PAGE -->
+  <div class="page" id="page-submit">
+    <div class="submit-page">
+      <div class="submit-header">
+        <div class="submit-title">Share your recipe</div>
+        <div class="submit-sub">Every recipe you publish is scored by NourishScore™ — helping our community discover food that genuinely nourishes them.</div>
+      </div>
+
+      <!-- Basic info -->
+      <div class="submit-card">
+        <div class="submit-card-title">📝 Recipe Details</div>
+        <div class="form-group"><label class="form-label">Recipe Title *</label><input type="text" class="form-input" id="sTitle" placeholder="e.g. Crispy Ginger Tofu with Sesame Greens" maxlength="120"></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="sDesc" placeholder="A few sentences about this dish — what makes it special?" maxlength="600" rows="3"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Category *</label><select class="form-select" id="sCategory"><option value="">Choose…</option><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Dessert</option><option>Drink</option></select></div>
+          <div class="form-group"><label class="form-label">Cuisine</label><input type="text" class="form-input" id="sCuisine" placeholder="e.g. Japanese, Italian, British…"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Servings *</label><input type="number" class="form-input" id="sServings" value="4" min="1" max="100"></div>
+          <div class="form-group"><label class="form-label">Emoji</label><input type="text" class="form-input" id="sEmoji" placeholder="🍜" maxlength="4"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Prep Time (mins)</label><input type="number" class="form-input" id="sPrepTime" placeholder="15"></div>
+          <div class="form-group"><label class="form-label">Cook Time (mins)</label><input type="number" class="form-input" id="sCookTime" placeholder="25"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dietary Tags</label>
+          <div class="dietary-checks">
+            <label class="dietary-check"><input type="checkbox" value="vegetarian"> 🥦 Vegetarian</label>
+            <label class="dietary-check"><input type="checkbox" value="vegan"> 🌱 Vegan</label>
+            <label class="dietary-check"><input type="checkbox" value="gluten-free"> 🌾 Gluten-free</label>
+            <label class="dietary-check"><input type="checkbox" value="dairy-free"> 🥛 Dairy-free</label>
+            <label class="dietary-check"><input type="checkbox" value="nut-free"> 🥜 Nut-free</label>
+            <label class="dietary-check"><input type="checkbox" value="low-carb"> 📉 Low-carb</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingredients -->
+      <div class="submit-card">
+        <div class="submit-card-title">🧂 Ingredients</div>
+        <div style="display:grid;grid-template-columns:80px 70px 1fr 28px;gap:6px;margin-bottom:7px;padding:0 2px">
+          <span style="font-size:.65rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em">Amount</span>
+          <span style="font-size:.65rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em">Unit</span>
+          <span style="font-size:.65rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em">Ingredient</span>
+          <span></span>
+        </div>
+        <div id="ingsList"></div>
+        <button class="add-ing-btn" onclick="addIngRow()">＋ Add ingredient</button>
+      </div>
+
+      <!-- Instructions -->
+      <div class="submit-card">
+        <div class="submit-card-title">👨‍🥗 Instructions</div>
+        <div class="form-group"><label class="form-label">Steps (one per line)</label><textarea class="form-textarea" id="sInstructions" placeholder="Step 1: Bring a large pot of salted water to the boil.&#10;Step 2: ..." rows="8"></textarea></div>
+      </div>
+
+      <!-- NourishScore Preview -->
+      <div class="submit-card">
+        <div class="submit-card-title">🌿 NourishScore™ Preview</div>
+        <p style="font-size:.82rem;color:var(--ink-mid);margin-bottom:14px;line-height:1.6">See your recipe's nutritional score before publishing. You can improve ingredients and re-check as many times as you like.</p>
+        <div id="nsPreviewContainer">
+          <div class="ns-preview-card">
+            <div class="ns-preview-title">Score not yet calculated</div>
+            <p style="font-size:.78rem;color:var(--ink-dim)">Fill in your ingredients above, then preview your NourishScore™.</p>
+          </div>
+        </div>
+        <button class="ns-preview-btn" id="previewScoreBtn" onclick="previewNourishScore()">✨ Preview NourishScore™</button>
+        <p style="font-size:.68rem;color:var(--ink-dim);margin-top:8px;text-align:center">Requires your Anthropic API key — enter it below if not already saved</p>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input type="password" class="form-input" id="submitApiKey" placeholder="sk-ant-… (optional, uses stored key if blank)">
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-final-btn" id="submitFinalBtn" onclick="submitRecipe()">🌿 Publish Recipe</button>
+      <p style="font-size:.72rem;color:var(--ink-dim);text-align:center;margin-top:10px;line-height:1.6">Your recipe will be reviewed against our community guidelines before going live. Recipes with a NourishScore™ analysis publish faster.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- RECIPE DETAIL MODAL -->
+<div class="modal-overlay" id="recipeModal" onclick="closeRecipeModal(event)">
+  <div class="recipe-modal" id="recipeModalContent"></div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeAuthModal(event)">
+  <div class="auth-modal">
+    <button class="modal-close" onclick="closeAuthModal()" style="position:static;margin-left:auto;display:flex">✕</button>
+    <div class="auth-header">
+      <div class="auth-logo">🌿</div>
+      <div class="auth-title">Join NourishHub</div>
+      <div class="auth-sub">Discover, save, and share nourishing recipes</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignin" onclick="switchAuthTab('signin')">Sign in</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+    <div id="authError" class="auth-error" style="display:none"></div>
+    <div id="authFormSignin">
+      <div class="auth-field"><label class="auth-label">Email</label><input type="email" class="auth-input" id="siEmail" placeholder="you@example.com"></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input type="password" class="auth-input" id="siPassword" placeholder="••••••••"></div>
+      <button class="auth-btn" onclick="signIn()">Sign in</button>
+    </div>
+    <div id="authFormSignup" style="display:none">
+      <div class="auth-field"><label class="auth-label">Username</label><input type="text" class="auth-input" id="suUsername" placeholder="your_handle" maxlength="30"></div>
+      <div class="auth-field"><label class="auth-label">Email</label><input type="email" class="auth-input" id="suEmail" placeholder="you@example.com"></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input type="password" class="auth-input" id="suPassword" placeholder="Min. 8 characters"></div>
+      <button class="auth-btn" onclick="signUp()">Create account</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIGURATION — replace with your Supabase project values
+// ══════════════════════════════════════════════════
+const SUPABASE_URL     = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const ANTHROPIC_API_KEY_STORAGE = 'nh_apikey'; // localStorage key for Claude key
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+if (!isConfigured) document.getElementById('setupBanner').classList.add('show');
+
+const sb = isConfigured
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+// ── State ──
+let currentUser   = null;
+let currentPage   = 'browse';
+let filters       = { band: null, category: null, dietary: [], sort: 'recent', search: '' };
+let recipes       = [];
+let savedIds      = new Set();
+let ingRows       = [];
+let nsPreviewData = null;
+let pageFrom      = 0;
+const PAGE_SIZE   = 18;
+
+// ── Band metadata ──
+const BANDS = {
+  Flourish: { emoji:'🌿', color:'var(--flourish)', pale:'var(--flourish-pale)', text:'var(--flourish-text)' },
+  Nourish:  { emoji:'🌱', color:'var(--nourish)',  pale:'var(--nourish-pale)',  text:'var(--nourish-text)' },
+  Balance:  { emoji:'⚖️', color:'var(--balance)',  pale:'var(--balance-pale)',  text:'var(--balance-text)' },
+  Savour:   { emoji:'🌼', color:'var(--savour)',   pale:'var(--savour-pale)',   text:'var(--savour-text)' },
+  Indulge:  { emoji:'💫', color:'var(--indulge)',  pale:'var(--indulge-pale)',  text:'var(--indulge-text)' },
+};
+const PORTION_SIGNALS = {
+  green: { icon:'🟢', label:'Portion-friendly', desc:'Great protein and fibre balance for the calorie load.' },
+  amber: { icon:'🟡', label:'Mind your portion', desc:'Nourishing but calorie-dense — pair with extra veg.' },
+  red:   { icon:'🔴', label:'Half-and-fill',      desc:'Consider a smaller portion alongside a big salad.' },
+};
+const BADGE_LABELS = { kitchen:'🏅 Nourish Kitchen', chef:'👨‍🥗 Nourish Chef', master:'🌟 Nourish Master' };
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+function toast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  t.innerHTML = icon + ' ' + msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function getApiKey() {
+  const field = document.getElementById('submitApiKey')?.value?.trim();
+  return field || localStorage.getItem(ANTHROPIC_API_KEY_STORAGE) || '';
+}
+
+function formatTime(mins) {
+  if (!mins) return null;
+  if (mins < 60) return mins + ' min';
+  return Math.floor(mins/60) + 'h ' + (mins%60 ? (mins%60)+'m' : '');
+}
+
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim('-');
+}
+
+function escHtml(str) {
+  const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+}
+
+// ══════════════════════════════════════════════════
+//  ROUTING
+// ══════════════════════════════════════════════════
+function navigate(page, param) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  if (page === 'browse') {
+    document.getElementById('page-browse').classList.add('active');
+    window.location.hash = '/browse';
+    if (param === 'refresh') { pageFrom = 0; loadRecipes(); }
+  } else if (page === 'profile' && param) {
+    document.getElementById('page-profile').classList.add('active');
+    window.location.hash = '/profile/' + param;
+    loadProfile(param);
+  } else if (page === 'submit') {
+    if (!currentUser) { openAuthModal(); return; }
+    document.getElementById('page-submit').classList.add('active');
+    window.location.hash = '/submit';
+    initSubmitForm();
+  }
+}
+
+function handleRoute() {
+  const hash = window.location.hash || '#/browse';
+  if (hash.startsWith('#/profile/')) {
+    const username = hash.replace('#/profile/', '');
+    navigate('profile', username);
+  } else if (hash === '#/submit') {
+    navigate('submit');
+  } else {
+    navigate('browse');
+  }
+}
+
+window.addEventListener('hashchange', handleRoute);
+
+// ══════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════
+function renderHeaderActions() {
+  const el = document.getElementById('headerActions');
+  if (!isConfigured) {
+    el.innerHTML = `<button class="btn-header btn-solid" onclick="openAuthModal()">Sign in</button>`;
+    return;
+  }
+  if (currentUser) {
+    const initials = (currentUser.profile?.display_name || currentUser.email || '?').charAt(0).toUpperCase();
+    const avatarHtml = currentUser.profile?.avatar_url
+      ? `<img src="${escHtml(currentUser.profile.avatar_url)}" alt="">`
+      : initials;
+    el.innerHTML = `
+      <button class="btn-header btn-solid" onclick="navigate('submit')">＋ Submit Recipe</button>
+      <div class="user-chip" onclick="navigate('profile', '${escHtml(currentUser.profile?.username || '')}')">
+        <div class="user-avatar">${avatarHtml}</div>
+        <span class="user-name">${escHtml(currentUser.profile?.username || 'Me')}</span>
+      </div>
+      <button class="btn-header btn-outline" onclick="signOut()">Sign out</button>`;
+  } else {
+    el.innerHTML = `
+      <button class="btn-header btn-outline" onclick="openAuthModal()">Sign in</button>
+      <button class="btn-header btn-solid" onclick="navigate('submit')">＋ Submit Recipe</button>`;
+  }
+}
+
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAuthModal(e) {
+  if (e && e.target !== document.getElementById('authModal') && e.target !== document.querySelector('.modal-close')) return;
+  document.getElementById('authModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchAuthTab(tab) {
+  const isSignin = tab === 'signin';
+  document.getElementById('tabSignin').classList.toggle('active', isSignin);
+  document.getElementById('tabSignup').classList.toggle('active', !isSignin);
+  document.getElementById('authFormSignin').style.display = isSignin ? 'block' : 'none';
+  document.getElementById('authFormSignup').style.display = isSignin ? 'none' : 'block';
+  document.getElementById('authError').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function signIn() {
+  if (!sb) return;
+  const email    = document.getElementById('siEmail').value.trim();
+  const password = document.getElementById('siPassword').value;
+  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { showAuthError(error.message); return; }
+  await loadCurrentUser();
+  closeAuthModal();
+  renderHeaderActions();
+  toast('Welcome back!', '👋');
+}
+
+async function signUp() {
+  if (!sb) return;
+  const username = document.getElementById('suUsername').value.trim().toLowerCase();
+  const email    = document.getElementById('suEmail').value.trim();
+  const password = document.getElementById('suPassword').value;
+  if (!username || !email || !password) { showAuthError('Please fill in all fields.'); return; }
+  if (password.length < 8) { showAuthError('Password must be at least 8 characters.'); return; }
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { username } } });
+  if (error) { showAuthError(error.message); return; }
+  await loadCurrentUser();
+  closeAuthModal();
+  renderHeaderActions();
+  toast('Welcome to NourishHub! 🌿', '🎉');
+}
+
+async function signOut() {
+  if (!sb) return;
+  await sb.auth.signOut();
+  currentUser = null; savedIds.clear();
+  renderHeaderActions();
+  navigate('browse', 'refresh');
+  toast('Signed out', '👋');
+}
+
+async function loadCurrentUser() {
+  if (!sb) return;
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { currentUser = null; return; }
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentUser = { ...user, profile };
+  await loadSavedIds();
+}
+
+async function loadSavedIds() {
+  if (!sb || !currentUser) return;
+  const { data } = await sb.from('recipe_saves').select('recipe_id').eq('user_id', currentUser.id);
+  savedIds = new Set((data || []).map(r => r.recipe_id));
+}
+
+// ══════════════════════════════════════════════════
+//  BROWSE & FILTERS
+// ══════════════════════════════════════════════════
+function filterBand(band, el) {
+  filters.band = band; pageFrom = 0;
+  document.querySelectorAll('.band-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadRecipes();
+}
+
+function filterCategory(cat, el) {
+  filters.category = cat; pageFrom = 0;
+  document.querySelectorAll('#categoryFilters .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadRecipes();
+}
+
+function toggleDietary(tag, el) {
+  el.classList.toggle('active');
+  if (el.classList.contains('active')) filters.dietary.push(tag);
+  else filters.dietary = filters.dietary.filter(d => d !== tag);
+  pageFrom = 0;
+  loadRecipes();
+}
+
+function changeSort(val) { filters.sort = val; pageFrom = 0; loadRecipes(); }
+
+function doSearch() {
+  filters.search = document.getElementById('headerSearch').value.trim();
+  filters.band = null; filters.category = null;
+  document.querySelectorAll('.band-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.band-chip.all')?.classList.add('active');
+  navigate('browse');
+  pageFrom = 0;
+  loadRecipes();
+}
+
+async function loadRecipes(append = false) {
+  const grid = document.getElementById('recipeGrid');
+
+  if (!append) {
+    grid.innerHTML = renderSkeletons(6);
+    document.getElementById('resultsLabel').textContent = '';
+  }
+
+  if (!isConfigured) {
+    grid.innerHTML = renderMockCards();
+    document.getElementById('resultsLabel').textContent = 'Showing demo data — configure Supabase to load real recipes.';
+    return;
+  }
+
+  // Decide which view to use based on sort
+  const view = filters.sort === 'trending' ? 'trending_recipes' : 'recipe_cards';
+  let q = sb.from(view).select('*').range(pageFrom, pageFrom + PAGE_SIZE - 1);
+
+  if (filters.band)     q = q.eq('nourish_band', filters.band);
+  if (filters.category) q = q.eq('category', filters.category);
+  if (filters.dietary.length) q = q.contains('dietary_flags', filters.dietary);
+  if (filters.search)   q = q.textSearch('title', filters.search, { type: 'plain', config: 'english' });
+
+  // Sort
+  if      (filters.sort === 'score')   q = q.order('nourish_score', { ascending: false, nullsFirst: false });
+  else if (filters.sort === 'popular') q = q.order('import_count',  { ascending: false });
+  else if (filters.sort === 'trending') q = q.order('trending_score', { ascending: false });
+  else                                  q = q.order('published_at', { ascending: false, nullsFirst: false });
+
+  const { data, error } = await q;
+
+  if (error) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Something went wrong</div><div class="empty-desc">${escHtml(error.message)}</div></div>`;
+    return;
+  }
+
+  if (!data?.length && !append) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No recipes found</div><div class="empty-desc">Try a different filter or be the first to submit a recipe in this category.</div><button class="btn-header btn-solid" onclick="navigate('submit')" style="margin-top:12px;padding:11px 24px">＋ Submit a Recipe</button></div>`;
+    return;
+  }
+
+  if (append) {
+    const existing = grid.querySelector('.recipe-grid') || grid;
+    data.forEach(r => { const div = document.createElement('div'); div.innerHTML = renderCard(r); existing.appendChild(div.firstChild); });
+  } else {
+    recipes = data;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'recipe-grid';
+    wrapper.innerHTML = data.map(r => renderCard(r)).join('');
+    grid.innerHTML = '';
+    grid.appendChild(wrapper);
+  }
+
+  const label = filters.search ? `${data.length}${data.length === PAGE_SIZE ? '+':''} results for "${filters.search}"` : `${data.length}${data.length === PAGE_SIZE ? '+':''} recipes`;
+  document.getElementById('resultsLabel').textContent = label;
+  document.getElementById('loadMoreWrap').style.display = data.length === PAGE_SIZE ? 'block' : 'none';
+  pageFrom += PAGE_SIZE;
+}
+
+function loadMore() { loadRecipes(true); }
+
+// ══════════════════════════════════════════════════
+//  RECIPE CARDS
+// ══════════════════════════════════════════════════
+function renderCard(r) {
+  const band = BANDS[r.nourish_band] || {};
+  const isSaved = savedIds.has(r.id);
+  const portionSig = PORTION_SIGNALS[r.portion_signal] || {};
+  const time = formatTime(r.total_time_mins);
+  const dietary = (r.dietary_flags || []).slice(0, 3).map(d => `<span class="dietary-tag">${escHtml(d)}</span>`).join('');
+  const badgeHtml = r.author_badge ? `<span class="author-badge" title="${BADGE_LABELS[r.author_badge]}">🏅</span>` : '';
+  const authorInit = (r.author_display_name || r.author_username || '?').charAt(0).toUpperCase();
+  const authorAv = r.author_avatar_url
+    ? `<img src="${escHtml(r.author_avatar_url)}" alt="">`
+    : authorInit;
+  const coverHtml = r.cover_image_url
+    ? `<img src="${escHtml(r.cover_image_url)}" alt="${escHtml(r.title)}" loading="lazy">`
+    : `<span class="card-emoji">${escHtml(r.emoji || '🍽')}</span>`;
+  const scoreBadge = r.nourish_score != null
+    ? `<div class="card-score" style="background:${band.pale};color:${band.text}">${band.emoji || ''} ${r.nourish_score}</div>`
+    : '';
+  const portionBadge = r.portion_signal
+    ? `<div class="card-portion" title="${portionSig.label}">${portionSig.icon}</div>` : '';
+
+  return `<div class="recipe-card" onclick="openRecipe('${r.slug}')">
+    <div class="card-image">
+      ${coverHtml}
+      ${scoreBadge}
+      ${portionBadge}
+      <button class="card-save-btn ${isSaved?'saved':''}" onclick="event.stopPropagation();toggleSave('${r.id}', this)" title="${isSaved?'Saved':'Save'}">${isSaved?'★':'☆'}</button>
+    </div>
+    <div class="card-body">
+      <div class="card-category">${escHtml(r.category||'')} ${r.cuisine ? '· '+escHtml(r.cuisine) : ''}</div>
+      <div class="card-title">${escHtml(r.title)}</div>
+      <div class="card-meta">
+        ${r.servings ? `<span>👤 ${r.servings}</span>` : ''}
+        ${time ? `<span>⏱ ${time}</span>` : ''}
+        ${r.import_count ? `<span>⬇ ${r.import_count}</span>` : ''}
+        ${r.avg_rating ? `<span>⭐ ${r.avg_rating}</span>` : ''}
+      </div>
+      ${dietary ? `<div class="card-dietary">${dietary}</div>` : ''}
+      <div class="card-author">
+        <div class="author-avatar-sm">${authorAv}</div>
+        <span class="author-name" onclick="event.stopPropagation();navigate('profile','${escHtml(r.author_username||'')}')">${escHtml(r.author_display_name || r.author_username || 'Unknown')}</span>
+        ${badgeHtml}
+        <button class="card-import-btn" onclick="event.stopPropagation();importRecipe('${r.id}')">Import ↗</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSkeletons(n) {
+  return `<div class="loading-grid">${Array(n).fill().map(()=>`
+    <div class="skeleton-card">
+      <div class="sk-img skeleton"></div>
+      <div class="sk-body">
+        <div class="sk-line skeleton" style="width:40%;height:9px"></div>
+        <div class="sk-line skeleton" style="width:85%"></div>
+        <div class="sk-line skeleton" style="width:60%;height:9px"></div>
+        <div class="sk-line skeleton" style="width:100%;height:9px;margin-top:14px"></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function renderMockCards() {
+  const mocks = [
+    { title:'Crispy Ginger Tofu Bowl', emoji:'🥢', band:'Flourish', score:87, category:'Dinner', servings:2, time:'25 min', portion:'green', dietary:['vegan','gluten-free'], author:'sarah_cooks', badge:'chef' },
+    { title:'Smoked Salmon Protein Bagel', emoji:'🥯', band:'Nourish', score:71, category:'Breakfast', servings:1, time:'10 min', portion:'amber', dietary:[], author:'nutritionist_jo', badge:'kitchen' },
+    { title:'Classic Chicken Tikka Masala', emoji:'🍛', band:'Balance', score:54, category:'Dinner', servings:4, time:'45 min', portion:'amber', dietary:[], author:'spice_kitchen', badge:null },
+    { title:'Avocado & Egg Toast', emoji:'🥑', band:'Nourish', score:68, category:'Breakfast', servings:2, time:'10 min', portion:'green', dietary:['vegetarian'], author:'healthystart', badge:null },
+    { title:'Banana Oat Protein Pancakes', emoji:'🥞', band:'Nourish', score:73, category:'Breakfast', servings:2, time:'20 min', portion:'green', dietary:['vegetarian','dairy-free'], author:'fit_foodie', badge:'kitchen' },
+    { title:'Slow-cooked Lamb Tagine', emoji:'🥘', band:'Balance', score:58, category:'Dinner', servings:6, time:'3h', portion:'amber', dietary:[], author:'medi_kitchen', badge:null },
+  ];
+  return `<div class="recipe-grid">${mocks.map(m=>{
+    const b = BANDS[m.band]||{};
+    const ps = PORTION_SIGNALS[m.portion]||{};
+    const dietary = m.dietary.map(d=>`<span class="dietary-tag">${d}</span>`).join('');
+    const badge = m.badge ? `<span class="author-badge" title="${BADGE_LABELS[m.badge]||''}">🏅</span>` : '';
+    return `<div class="recipe-card" style="cursor:default">
+      <div class="card-image">
+        <span class="card-emoji">${m.emoji}</span>
+        <div class="card-score" style="background:${b.pale};color:${b.text}">${b.emoji} ${m.score}</div>
+        <div class="card-portion" title="${ps.label}">${ps.icon}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-category">${m.category}</div>
+        <div class="card-title">${m.title}</div>
+        <div class="card-meta"><span>👤 ${m.servings}</span><span>⏱ ${m.time}</span></div>
+        ${dietary?`<div class="card-dietary">${dietary}</div>`:''}
+        <div class="card-author">
+          <div class="author-avatar-sm">${m.author.charAt(0).toUpperCase()}</div>
+          <span class="author-name">@${m.author}</span>${badge}
+          <button class="card-import-btn" disabled style="opacity:.4">Import ↗</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ══════════════════════════════════════════════════
+//  RECIPE DETAIL
+// ══════════════════════════════════════════════════
+async function openRecipe(slug) {
+  document.getElementById('recipeModal').classList.add('open');
+  document.getElementById('recipeModalContent').innerHTML = `<div style="padding:60px;text-align:center"><div class="spinner" style="color:var(--forest);width:32px;height:32px;border-width:3px"></div></div>`;
+  document.body.style.overflow = 'hidden';
+
+  if (!isConfigured) {
+    renderRecipeModal({ title: 'Demo Recipe', emoji: '🌿', category: 'Dinner', description: 'This is a demo recipe. Configure Supabase to load real recipes.', servings: 4, total_time_mins: 30, nourish_score: 82, nourish_band: 'Flourish', portion_signal: 'green', nourish_data: { kcal: 380, proteinG: 28, fibreG: 8, carbsG: 42, fatG: 12, satFatG: 3, highlights: ['💪 High Protein', '🌾 High Fibre'], watchpoints: [], tip: 'A beautifully balanced meal.' }, dietary_flags: ['vegetarian'], ingredients: [{amount:200,unit:'g',name:'tofu'},{amount:2,unit:'tbsp',name:'soy sauce'}], instructions: ['Step one: prepare your ingredients.','Step two: cook everything.','Step three: serve and enjoy.'], author_username: 'demo_chef', author_display_name: 'Demo Chef', save_count: 12, import_count: 34 });
+    return;
+  }
+
+  const { data, error } = await sb.from('recipe_detail').select('*').eq('slug', slug).single();
+  if (error || !data) {
+    document.getElementById('recipeModalContent').innerHTML = `<div style="padding:40px;text-align:center;color:var(--ink-dim)"><div style="font-size:2rem;margin-bottom:12px">🔍</div><p>Recipe not found.</p><button class="modal-close" onclick="closeRecipeModal()" style="position:static;margin:16px auto;display:flex">Close</button></div>`;
+    return;
+  }
+
+  // Record view (best-effort, direct update — no RPC needed)
+  if (sb && data.id) {
+    sb.from('recipes')
+      .update({ view_count: (data.view_count || 0) + 1 })
+      .eq('id', data.id)
+      .catch(() => {});
+  }
+  renderRecipeModal(data);
+}
+
+function renderRecipeModal(r) {
+  const band = BANDS[r.nourish_band] || {};
+  const ns   = r.nourish_data || {};
+  const isSaved = savedIds.has(r.id);
+  const portionSig = PORTION_SIGNALS[r.portion_signal] || {};
+  const time = formatTime(r.total_time_mins);
+  const dietary = (r.dietary_flags || []).map(d => `<span class="dietary-tag">${escHtml(d)}</span>`).join('');
+  const authorInit = (r.author_display_name || r.author_username || '?').charAt(0).toUpperCase();
+  const authorAv = r.author_avatar_url
+    ? `<img src="${escHtml(r.author_avatar_url)}" alt="">`
+    : authorInit;
+  const badgeHtml = r.author_badge ? `<span class="modal-author-badge">${BADGE_LABELS[r.author_badge]}</span>` : '';
+
+  const coverHtml = r.cover_image_url
+    ? `<img src="${escHtml(r.cover_image_url)}" alt="${escHtml(r.title)}">`
+    : `<span class="modal-emoji">${escHtml(r.emoji || '🍽')}</span>`;
+
+  const scoreBadgeHtml = r.nourish_score != null
+    ? `<div class="modal-score-badge" style="background:${band.pale};color:${band.text}">${band.emoji} ${r.nourish_band} · ${r.nourish_score}/100</div>` : '';
+  const portionBadgeHtml = r.portion_signal
+    ? `<div class="modal-portion-badge">${portionSig.icon} ${portionSig.label}</div>` : '';
+
+  // NourishScore card
+  const nsMacros = [
+    ns.kcal     != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.kcal}<span class="msc-macro-unit">kcal</span></div><div class="msc-macro-label">Energy</div></div>` : '',
+    ns.proteinG != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.proteinG}g</div><div class="msc-macro-label">💪 Protein</div></div>` : '',
+    ns.fibreG   != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.fibreG}g</div><div class="msc-macro-label">🌾 Fibre</div></div>` : '',
+    ns.carbsG   != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.carbsG}g</div><div class="msc-macro-label">⚡ Carbs</div></div>` : '',
+    ns.fatG     != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.fatG}g</div><div class="msc-macro-label">🫒 Fat</div></div>` : '',
+    ns.satFatG  != null ? `<div class="msc-macro"><div class="msc-macro-val">${ns.satFatG}g</div><div class="msc-macro-label">🧈 Sat.</div></div>` : '',
+  ].filter(Boolean).join('');
+  const nsHighlights = (ns.highlights||[]).map(h=>`<span class="msc-pill pos">${escHtml(h)}</span>`).join('');
+  const nsWatchpoints = (ns.watchpoints||[]).map(w=>`<span class="msc-pill watch">⚠ ${escHtml(w)}</span>`).join('');
+  const nsCard = r.nourish_score != null ? `
+    <div class="modal-score-card">
+      <div class="msc-header" style="background:${band.color}">
+        <div class="msc-ring"><div class="msc-score-num">${r.nourish_score}</div><div class="msc-score-max">/100</div></div>
+        <div><div class="msc-band-name">${band.emoji} ${escHtml(r.nourish_band||'')}</div></div>
+      </div>
+      <div class="msc-body">
+        ${nsMacros ? `<div class="msc-macros">${nsMacros}</div>` : ''}
+        ${nsHighlights||nsWatchpoints ? `<div class="msc-pills">${nsHighlights}${nsWatchpoints}</div>` : ''}
+        ${ns.tip ? `<div class="msc-tip">${escHtml(ns.tip)}</div>` : ''}
+        <div class="msc-disclaimer">NourishScore™ values are estimates per portion. Not a substitute for professional dietary advice.</div>
+      </div>
+    </div>
+    ${r.portion_signal ? `<div class="portion-signal ${r.portion_signal}"><span class="ps-icon">${portionSig.icon}</span><div><div class="ps-label">${portionSig.label}</div><div class="ps-desc">${portionSig.desc}</div></div></div>` : ''}` : '';
+
+  // Ingredients
+  const ings = (r.ingredients || []).map(ing =>
+    `<li class="ing-row"><span class="ing-amount">${ing.amount > 0 ? ing.amount+' '+escHtml(ing.unit||'') : escHtml(ing.unit||'')}</span><span class="ing-name">${escHtml(ing.name||'')}</span></li>`
+  ).join('');
+
+  // Instructions
+  const steps = (() => {
+    const arr = r.instructions || [];
+    return arr.map((s, i) => {
+      const text = typeof s === 'string' ? s : s.text || '';
+      return `<li class="step-row"><div class="step-num">${i+1}</div><p class="step-text">${escHtml(text)}</p></li>`;
+    }).join('');
+  })();
+
+  document.getElementById('recipeModalContent').innerHTML = `
+    <div class="modal-cover">
+      ${coverHtml}
+      <button class="modal-close" onclick="closeRecipeModal()">✕</button>
+      ${scoreBadgeHtml}
+      ${portionBadgeHtml}
+    </div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <div class="modal-category">${escHtml(r.category||'')}${r.cuisine?' · '+escHtml(r.cuisine):''}</div>
+        <div class="modal-title">${escHtml(r.title)}</div>
+        <div class="modal-author">
+          <div class="modal-author-av">${authorAv}</div>
+          <span class="modal-author-name" style="cursor:pointer" onclick="navigate('profile','${escHtml(r.author_username||'')}')">${escHtml(r.author_display_name||r.author_username||'')}</span>
+          ${badgeHtml}
+        </div>
+        ${r.description ? `<p style="font-size:.88rem;color:var(--ink-mid);line-height:1.65;margin-bottom:12px">${escHtml(r.description)}</p>` : ''}
+        <div class="modal-meta">
+          ${r.servings    ? `<div class="modal-meta-item">👤 ${r.servings} servings</div>` : ''}
+          ${time          ? `<div class="modal-meta-item">⏱ ${time}</div>` : ''}
+          ${r.save_count  ? `<div class="modal-meta-item">🔖 ${r.save_count}</div>` : ''}
+          ${r.import_count? `<div class="modal-meta-item">⬇ ${r.import_count} imports</div>` : ''}
+        </div>
+        ${dietary ? `<div class="card-dietary" style="margin-bottom:14px">${dietary}</div>` : ''}
+      </div>
+      <div class="modal-actions">
+        <button class="btn-action btn-import" onclick="importRecipe('${r.id||''}')">⬇ Import to Mise en Place</button>
+        <button class="btn-action btn-save-recipe ${isSaved?'saved':''}" id="modalSaveBtn" onclick="toggleSave('${r.id||''}', this)">${isSaved?'★ Saved':'☆ Save'}</button>
+      </div>
+      ${nsCard}
+      ${ings ? `<div class="modal-section-title">🧂 Ingredients</div><ul class="ing-grid">${ings}</ul>` : ''}
+      ${steps ? `<div class="modal-section-title">👨‍🥗 Instructions</div><ol class="steps-list">${steps}</ol>` : ''}
+    </div>`;
+}
+
+function closeRecipeModal(e) {
+  if (e && e.target !== document.getElementById('recipeModal')) return;
+  document.getElementById('recipeModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════════════
+//  SAVE & IMPORT
+// ══════════════════════════════════════════════════
+async function toggleSave(recipeId, btn) {
+  if (!currentUser) { openAuthModal(); return; }
+  if (!sb) return;
+  const isSaved = savedIds.has(recipeId);
+  if (isSaved) {
+    await sb.from('recipe_saves').delete().eq('user_id', currentUser.id).eq('recipe_id', recipeId);
+    savedIds.delete(recipeId);
+    btn.textContent = '☆'; btn.classList.remove('saved');
+    toast('Removed from saved', '🔖');
+  } else {
+    await sb.from('recipe_saves').insert({ user_id: currentUser.id, recipe_id: recipeId });
+    savedIds.add(recipeId);
+    btn.textContent = '★'; btn.classList.add('saved');
+    toast('Saved!', '★');
+  }
+}
+
+async function importRecipe(recipeId) {
+  // Log import to Supabase
+  if (sb && currentUser) {
+    await sb.from('recipe_imports').upsert({ user_id: currentUser.id, recipe_id: recipeId }).catch(() => {});
+  }
+
+  // Get full recipe data
+  let recipeData;
+  if (sb) {
+    const { data } = await sb.from('recipe_detail').select('*').eq('id', recipeId).single();
+    recipeData = data;
+  }
+
+  if (!recipeData) {
+    toast('Could not fetch recipe data', '❌'); return;
+  }
+
+  // Format for Mise en Place localStorage format
+  const mepRecipe = {
+    id: 'hub_' + recipeData.id.slice(0, 8),
+    name: recipeData.title,
+    emoji: recipeData.emoji || '🍽',
+    image: recipeData.cover_image_url || null,
+    category: recipeData.category || 'Dinner',
+    servings: recipeData.servings || 4,
+    time: formatTime(recipeData.total_time_mins) || '',
+    ingredients: recipeData.ingredients || [],
+    instructions: (recipeData.instructions || []).map(s => typeof s === 'string' ? s : s.text || ''),
+    nourishScore: recipeData.nourish_data ? {
+      score: recipeData.nourish_score,
+      band: recipeData.nourish_band,
+      bandEmoji: BANDS[recipeData.nourish_band]?.emoji || '',
+      ...recipeData.nourish_data
+    } : null,
+    hubSourceId: recipeData.id,
+    importedFrom: 'NourishHub',
+  };
+
+  // Download as JSON for user to import
+  const json = JSON.stringify(mepRecipe, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = slugify(recipeData.title) + '.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+
+  toast('Recipe downloaded! Open Mise en Place → ＋ Add → Import JSON', '⬇');
+}
+
+// ══════════════════════════════════════════════════
+//  PROFILE PAGE
+// ══════════════════════════════════════════════════
+async function loadProfile(username) {
+  const el = document.getElementById('page-profile');
+  el.innerHTML = `<div style="padding:60px;text-align:center"><div class="spinner" style="color:var(--forest);width:32px;height:32px;border-width:3px"></div></div>`;
+
+  if (!isConfigured) {
+    renderProfile({ username, display_name: 'Demo Creator', bio: 'This is a demo profile. Configure Supabase to see real creators.', recipe_count: 12, avg_nourish_score: 74.5, nourish_badge: 'chef', follower_count: 234, following_count: 18, flourish_count: 4, nourish_count: 6, balance_count: 2 }, []);
+    return;
+  }
+
+  const [profileRes, recipesRes] = await Promise.all([
+    sb.from('creator_profiles').select('*').eq('username', username).single(),
+    sb.from('recipe_cards').select('*').eq('author_username', username).order('published_at', { ascending: false }).limit(12)
+  ]);
+
+  if (profileRes.error || !profileRes.data) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Creator not found</div></div>`;
+    return;
+  }
+
+  renderProfile(profileRes.data, recipesRes.data || []);
+}
+
+function renderProfile(profile, userRecipes) {
+  const el = document.getElementById('page-profile');
+  const badge = profile.nourish_badge ? `<div class="profile-badge">${BADGE_LABELS[profile.nourish_badge]}</div>` : '';
+  const initials = (profile.display_name || profile.username || '?').charAt(0).toUpperCase();
+  const avatarHtml = profile.avatar_url ? `<img src="${escHtml(profile.avatar_url)}" alt="">` : initials;
+  const bandDist = [
+    profile.flourish_count ? `<span style="color:var(--flourish)">🌿 ${profile.flourish_count} Flourish</span>` : '',
+    profile.nourish_count  ? `<span style="color:var(--nourish)">🌱 ${profile.nourish_count} Nourish</span>` : '',
+    profile.balance_count  ? `<span style="color:var(--balance)">⚖️ ${profile.balance_count} Balance</span>` : '',
+  ].filter(Boolean).join(' · ');
+
+  el.innerHTML = `
+    <div class="profile-hero">
+      <div class="profile-avatar">${avatarHtml}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escHtml(profile.display_name || profile.username)}</div>
+        <div class="profile-handle">@${escHtml(profile.username)}</div>
+        ${profile.bio ? `<div class="profile-bio">${escHtml(profile.bio)}</div>` : ''}
+        ${badge}
+        <div class="profile-stats">
+          <div class="profile-stat"><div class="profile-stat-val">${profile.recipe_count||0}</div><div class="profile-stat-label">Recipes</div></div>
+          ${profile.avg_nourish_score != null ? `<div class="profile-stat"><div class="profile-stat-val">${profile.avg_nourish_score}</div><div class="profile-stat-label">Avg Score</div></div>` : ''}
+          <div class="profile-stat"><div class="profile-stat-val">${profile.follower_count||0}</div><div class="profile-stat-label">Followers</div></div>
+        </div>
+        ${bandDist ? `<div style="font-size:.75rem;color:var(--ink-dim);margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">${bandDist}</div>` : ''}
+      </div>
+    </div>
+    <div class="recipe-grid" id="profileGrid">
+      ${userRecipes.map(r => renderCard(r)).join('') || '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🌱</div><div class="empty-title">No published recipes yet</div></div>'}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+//  SUBMIT FORM
+// ══════════════════════════════════════════════════
+function initSubmitForm() {
+  ingRows = [{ amount:'', unit:'', name:'' }];
+  renderIngRows();
+}
+
+function renderIngRows() {
+  document.getElementById('ingsList').innerHTML = ingRows.map((row, i) => `
+    <div class="ing-entry">
+      <input type="text" value="${escHtml(row.amount)}" placeholder="400" oninput="ingRows[${i}].amount=this.value">
+      <input type="text" value="${escHtml(row.unit)}" placeholder="g" oninput="ingRows[${i}].unit=this.value">
+      <input type="text" value="${escHtml(row.name)}" placeholder="Ingredient name" oninput="ingRows[${i}].name=this.value">
+      <button class="ing-remove" onclick="removeIngRow(${i})">−</button>
+    </div>`).join('');
+}
+
+function addIngRow() { ingRows.push({ amount:'', unit:'', name:'' }); renderIngRows(); }
+function removeIngRow(i) { if (ingRows.length === 1) return; ingRows.splice(i, 1); renderIngRows(); }
+
+async function previewNourishScore() {
+  const apiKey = getApiKey();
+  if (!apiKey) { toast('Enter your Anthropic API key below', '🔑'); return; }
+
+  const title    = document.getElementById('sTitle').value.trim();
+  const servings = parseInt(document.getElementById('sServings').value) || 4;
+  const ings     = ingRows.filter(r => r.name.trim());
+  if (!title || ings.length < 2) { toast('Add a title and at least 2 ingredients first', '❌'); return; }
+
+  const btn = document.getElementById('previewScoreBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="color:var(--forest)"></span> Calculating…';
+
+  const ingList = ings.map(i => `${i.amount} ${i.unit} ${i.name}`.trim()).join('\n');
+  const prompt = `You are a nutrition scientist. Analyse this recipe per portion using evidence-based nutrition science.
+
+Recipe: ${title}
+Servings: ${servings}
+Ingredients:
+${ingList}
+
+Calculate a NourishScore (0-100):
+START at 50.
+ADD: Protein >25g/portion +15, >15g +9, >8g +4. Fibre >8g +12, >4g +7, >2g +3. Whole foods +8. Vegetables/fruit +6. Healthy fats (olive oil, avocado, nuts) +5.
+SUBTRACT: Calories >350: -1 per 60kcal over. Sat fat >12g -9, >7g -5, >4g -2. Added sugar >15g -10, >8g -6, >4g -3. Ultra-processed ingredients -4 each max -12. Sodium >1200mg -4.
+Clamp 0–100. All values are PER PORTION.
+
+Reply ONLY with valid JSON, no markdown:
+{"score":72,"kcal":420,"proteinG":32,"carbsG":38,"fatG":14,"satFatG":4,"fibreG":6,"addedSugarG":2,"estimatedServingGrams":380,"highlights":["💪 High Protein"],"watchpoints":["⚡ Calorie-dense"],"tip":"One practical sentence."}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, messages: [{ role:'user', content: prompt }] })
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || `API ${res.status}`); }
+    const data = await res.json();
+    const text = data.content[0]?.text || '';
+    const jm = text.match(/\{[\s\S]*\}/);
+    if (!jm) throw new Error('No JSON returned');
+    nsPreviewData = JSON.parse(jm[0]);
+    const band = Object.entries({ Flourish:80, Nourish:60, Balance:40, Savour:20, Indulge:0 }).find(([,v]) => nsPreviewData.score >= v)?.[0] || 'Indulge';
+    const b = BANDS[band] || {};
+    nsPreviewData.band = band;
+
+    document.getElementById('nsPreviewContainer').innerHTML = `
+      <div style="background:${b.pale};border:1.5px solid ${b.color};border-radius:var(--r-sm);padding:14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:46px;height:46px;border-radius:50%;background:${b.color};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+            <span style="font-family:var(--fd);font-size:1.2rem;font-weight:700;color:#fff;line-height:1">${nsPreviewData.score}</span>
+            <span style="font-size:.5rem;color:rgba(255,255,255,.75)">/100</span>
+          </div>
+          <div>
+            <div style="font-family:var(--fd);font-size:1.05rem;font-weight:600;color:${b.text}">${b.emoji} ${band}</div>
+            <div style="font-size:.72rem;color:var(--ink-mid);margin-top:1px">${nsPreviewData.kcal} kcal · ${nsPreviewData.proteinG}g protein · ${nsPreviewData.fibreG}g fibre per portion</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+          ${(nsPreviewData.highlights||[]).map(h=>`<span class="msc-pill pos">${escHtml(h)}</span>`).join('')}
+          ${(nsPreviewData.watchpoints||[]).map(w=>`<span class="msc-pill watch">⚠ ${escHtml(w)}</span>`).join('')}
+        </div>
+        ${nsPreviewData.tip ? `<p style="font-size:.75rem;color:var(--ink-mid);font-style:italic;line-height:1.5">${escHtml(nsPreviewData.tip)}</p>` : ''}
+      </div>`;
+    toast(`NourishScore™: ${b.emoji} ${band} — ${nsPreviewData.score}/100`, '🌿');
+  } catch(err) {
+    document.getElementById('nsPreviewContainer').innerHTML = `<div style="color:#8B2020;font-size:.82rem;padding:10px">${escHtml(err.message)}</div>`;
+    toast('Score preview failed', '❌');
+  }
+  btn.disabled = false; btn.innerHTML = '✨ Re-preview NourishScore™';
+
+  if (apiKey && apiKey.startsWith('sk-ant-')) localStorage.setItem(ANTHROPIC_API_KEY_STORAGE, apiKey);
+}
+
+async function submitRecipe() {
+  if (!currentUser) { openAuthModal(); return; }
+  if (!sb) { toast('Configure Supabase first', '❌'); return; }
+
+  const title    = document.getElementById('sTitle').value.trim();
+  const desc     = document.getElementById('sDesc').value.trim();
+  const category = document.getElementById('sCategory').value;
+  const cuisine  = document.getElementById('sCuisine').value.trim();
+  const servings = parseInt(document.getElementById('sServings').value) || 4;
+  const emoji    = document.getElementById('sEmoji').value.trim() || '🍽';
+  const prepMins = parseInt(document.getElementById('sPrepTime').value) || null;
+  const cookMins = parseInt(document.getElementById('sCookTime').value) || null;
+  const ings     = ingRows.filter(r => r.name.trim()).map(r => ({ amount: parseFloat(r.amount)||0, unit: r.unit.trim(), name: r.name.trim(), category: 'Other' }));
+  const steps    = document.getElementById('sInstructions').value.split('\n').map(s=>s.trim()).filter(Boolean).map((text, i) => ({ step: i+1, text }));
+  const dietary  = [...document.querySelectorAll('.dietary-check input:checked')].map(c => c.value);
+
+  if (!title)    { toast('Please add a recipe title', '❌'); return; }
+  if (!category) { toast('Please select a category', '❌'); return; }
+  if (ings.length < 2) { toast('Please add at least 2 ingredients', '❌'); return; }
+  if (steps.length < 2){ toast('Please add at least 2 instruction steps', '❌'); return; }
+
+  const btn = document.getElementById('submitFinalBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner" style="display:inline-block;margin-right:8px"></span> Publishing…';
+
+  const recipe = {
+    author_id:    currentUser.id,
+    title, description: desc || null, emoji, category,
+    cuisine: cuisine || null,
+    servings, prep_time_mins: prepMins, cook_time_mins: cookMins,
+    ingredients: ings, instructions: steps,
+    dietary_flags: dietary,
+    status: 'pending_review',
+    ...(nsPreviewData ? {
+      nourish_score:  nsPreviewData.score,
+      nourish_band:   nsPreviewData.band,
+      nourish_data:   nsPreviewData,
+      portion_signal: nsPreviewData.score >= 60 ? 'green' : nsPreviewData.score >= 40 ? 'amber' : 'red',
+      fill_rate: nsPreviewData.kcal > 0 ? Math.round(((nsPreviewData.proteinG||0) + (nsPreviewData.fibreG||0)) / nsPreviewData.kcal * 1000) / 10 : null,
+      ai_moderation_score: 90, // optimistic default; would normally be set by a server function
+    } : {})
+  };
+
+  const { data, error } = await sb.from('recipes').insert(recipe).select('slug').single();
+  if (error) {
+    toast('Submission failed: ' + error.message, '❌');
+    btn.disabled = false; btn.innerHTML = '🌿 Publish Recipe';
+    return;
+  }
+
+  toast('Recipe submitted! It will appear once reviewed. 🌿', '🎉');
+  btn.innerHTML = '✅ Submitted!';
+  setTimeout(() => navigate('browse'), 2000);
+}
+
+// ══════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════
+async function boot() {
+  // Register service worker for offline support
+  if ('serviceWorker' in navigator && location.hostname !== 'www.claudeusercontent.com' && !location.hostname.includes('claudeusercontent.com')) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('NourishHub SW registered', reg.scope))
+      .catch(err => console.warn('SW registration failed:', err));
+  }
+
+  if (sb) await loadCurrentUser();
+  renderHeaderActions();
+  handleRoute();
+  if (currentPage === 'browse') loadRecipes();
+}
+
+boot();
+</script>
+</body>
+</html>
